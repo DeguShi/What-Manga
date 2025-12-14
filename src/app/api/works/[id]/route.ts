@@ -1,0 +1,91 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db';
+import { z } from 'zod';
+
+interface RouteParams {
+    params: Promise<{ id: string }>;
+}
+
+export async function GET(request: NextRequest, { params }: RouteParams) {
+    try {
+        const { id } = await params;
+        const work = await prisma.work.findUnique({
+            where: { id },
+        });
+
+        if (!work) {
+            return NextResponse.json(
+                { error: 'Work not found' },
+                { status: 404 }
+            );
+        }
+
+        return NextResponse.json(work);
+    } catch (error) {
+        console.error('Error fetching work:', error);
+        return NextResponse.json(
+            { error: 'Failed to fetch work' },
+            { status: 500 }
+        );
+    }
+}
+
+// Update schema
+const updateSchema = z.object({
+    title: z.string().min(1).optional(),
+    userIndex: z.number().int().optional(),
+    status: z.enum(['IN_PROGRESS', 'COMPLETED', 'INCOMPLETE', 'UNCERTAIN', 'DROPPED_HIATUS']).optional(),
+    mangaProgressRaw: z.string().optional().nullable(),
+    mangaProgressCurrent: z.number().optional().nullable(),
+    mangaProgressUnit: z.string().optional().nullable(),
+    novelProgressRaw: z.string().optional().nullable(),
+    novelProgressCurrent: z.number().optional().nullable(),
+    novelProgressUnit: z.string().optional().nullable(),
+    novelExtra: z.string().optional().nullable(),
+    score: z.number().min(0).max(10).optional().nullable(),
+    reviewNote: z.string().optional().nullable(),
+});
+
+export async function PATCH(request: NextRequest, { params }: RouteParams) {
+    try {
+        const { id } = await params;
+        const body = await request.json();
+        const data = updateSchema.parse(body);
+
+        const work = await prisma.work.update({
+            where: { id },
+            data,
+        });
+
+        return NextResponse.json(work);
+    } catch (error) {
+        if (error instanceof z.ZodError) {
+            return NextResponse.json(
+                { error: 'Validation failed', details: error.errors },
+                { status: 400 }
+            );
+        }
+        console.error('Error updating work:', error);
+        return NextResponse.json(
+            { error: 'Failed to update work' },
+            { status: 500 }
+        );
+    }
+}
+
+export async function DELETE(request: NextRequest, { params }: RouteParams) {
+    try {
+        const { id } = await params;
+        await prisma.work.delete({
+            where: { id },
+        });
+
+        return NextResponse.json({ success: true });
+    } catch (error) {
+        console.error('Error deleting work:', error);
+        return NextResponse.json(
+            { error: 'Failed to delete work' },
+            { status: 500 }
+        );
+    }
+}
