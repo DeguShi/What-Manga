@@ -1,0 +1,39 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Work {
+  id                    String   @id @default(uuid())
+  title                 String
+  userIndex             Int
+  status                String   @default("IN_PROGRESS")
+
+  // Manga progress
+  mangaProgressRaw      String?
+  mangaProgressCurrent  Float?
+  mangaProgressUnit     String?
+
+  // Novel progress
+  novelProgressRaw      String?
+  novelProgressCurrent  Float?
+  novelProgressUnit     String?
+  novelExtra            String?
+
+  // Metadata
+  score                 Float?
+  reviewNote            String?
+  rawImportedText       String?
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([title])
+  @@index([status])
+  @@index([score])
+  @@index([userIndex])
+}
