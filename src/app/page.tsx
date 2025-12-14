@@ -3,38 +3,39 @@ import {
     BookOpen,
     Upload,
     Download,
-    Search,
-    Filter,
     List,
+    ChevronDown,
+    Check,
+    FileText,
+    FileCode,
 } from 'lucide-react';
 import { prisma } from '@/lib/db';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { WorkList } from '@/components/work-list';
+import { ThemeToggleButton } from '@/components/theme-toggle';
 
 async function getWorks() {
     try {
         const works = await prisma.work.findMany({
             orderBy: { userIndex: 'asc' },
-            take: 100,
         });
         return works;
     } catch {
-        // Database might not exist yet
         return [];
     }
 }
 
 async function getStats() {
     try {
-        const [total, completed, inProgress] = await Promise.all([
+        const [total, completed, inProgress, dropped] = await Promise.all([
             prisma.work.count(),
             prisma.work.count({ where: { status: 'COMPLETED' } }),
             prisma.work.count({ where: { status: 'IN_PROGRESS' } }),
+            prisma.work.count({ where: { status: 'DROPPED_HIATUS' } }),
         ]);
-        return { total, completed, inProgress };
+        return { total, completed, inProgress, dropped };
     } catch {
-        return { total: 0, completed: 0, inProgress: 0 };
+        return { total: 0, completed: 0, inProgress: 0, dropped: 0 };
     }
 }
 
@@ -42,66 +43,109 @@ export default async function HomePage() {
     const [works, stats] = await Promise.all([getWorks(), getStats()]);
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
-            {/* Header */}
-            <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="min-h-screen mesh-gradient">
+            {/* Premium Header */}
+            <header className="sticky top-0 z-40 glass border-b border-white/10">
                 <div className="container mx-auto flex h-16 items-center justify-between px-4">
                     <div className="flex items-center gap-3">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                            <BookOpen className="h-5 w-5" />
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl gradient-primary shadow-lg glow-sm">
+                            <BookOpen className="h-5 w-5 text-white" />
                         </div>
-                        <h1 className="text-xl font-bold tracking-tight">What-Manga</h1>
+                        <div>
+                            <h1 className="text-xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
+                                What-Manga
+                            </h1>
+                            <p className="text-xs text-muted-foreground hidden sm:block">Tracker</p>
+                        </div>
                     </div>
+
                     <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm" asChild>
+                        <ThemeToggleButton />
+
+                        <Button variant="outline" size="sm" className="glass-button" asChild>
                             <Link href="/import">
                                 <Upload className="mr-2 h-4 w-4" />
                                 Import
                             </Link>
                         </Button>
-                        <Button variant="outline" size="sm" asChild>
-                            <a href="/api/export/csv">
+
+                        {/* Export Dropdown */}
+                        <div className="relative group">
+                            <Button variant="outline" size="sm" className="glass-button">
                                 <Download className="mr-2 h-4 w-4" />
-                                Export CSV
-                            </a>
-                        </Button>
+                                Export
+                                <ChevronDown className="ml-2 h-3 w-3" />
+                            </Button>
+                            <div className="absolute right-0 mt-2 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                                <div className="glass-card rounded-lg p-1 shadow-xl">
+                                    <a
+                                        href="/api/export/csv"
+                                        className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-primary/10 transition-colors"
+                                    >
+                                        <FileText className="h-4 w-4" />
+                                        CSV Spreadsheet
+                                    </a>
+                                    <a
+                                        href="/api/export/mal"
+                                        className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-primary/10 transition-colors"
+                                    >
+                                        <FileCode className="h-4 w-4" />
+                                        MAL XML Format
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </header>
 
             <main className="container mx-auto px-4 py-8">
-                {/* Stats Cards */}
-                <div className="mb-8 grid gap-4 md:grid-cols-3">
-                    <div className="rounded-lg border bg-card p-6 shadow-sm">
+                {/* Premium Stats Cards */}
+                <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 animate-fade-in">
+                    <div className="glass-card rounded-2xl p-6 group hover:glow-sm transition-all duration-300">
                         <div className="flex items-center gap-4">
-                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                                <List className="h-6 w-6 text-primary" />
+                            <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                <List className="h-6 w-6 text-white" />
                             </div>
                             <div>
-                                <p className="text-sm text-muted-foreground">Total Works</p>
-                                <p className="text-3xl font-bold">{stats.total}</p>
+                                <p className="text-sm font-medium text-muted-foreground">Total Works</p>
+                                <p className="text-3xl font-bold tracking-tight">{stats.total}</p>
                             </div>
                         </div>
                     </div>
-                    <div className="rounded-lg border bg-card p-6 shadow-sm">
+
+                    <div className="glass-card rounded-2xl p-6 group hover:glow-sm transition-all duration-300">
                         <div className="flex items-center gap-4">
-                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-500/10">
-                                <BookOpen className="h-6 w-6 text-green-600" />
+                            <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                <Check className="h-6 w-6 text-white" />
                             </div>
                             <div>
-                                <p className="text-sm text-muted-foreground">Completed</p>
-                                <p className="text-3xl font-bold">{stats.completed}</p>
+                                <p className="text-sm font-medium text-muted-foreground">Completed</p>
+                                <p className="text-3xl font-bold tracking-tight text-emerald-600 dark:text-emerald-400">{stats.completed}</p>
                             </div>
                         </div>
                     </div>
-                    <div className="rounded-lg border bg-card p-6 shadow-sm">
+
+                    <div className="glass-card rounded-2xl p-6 group hover:glow-sm transition-all duration-300">
                         <div className="flex items-center gap-4">
-                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-500/10">
-                                <BookOpen className="h-6 w-6 text-blue-600" />
+                            <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                <BookOpen className="h-6 w-6 text-white" />
                             </div>
                             <div>
-                                <p className="text-sm text-muted-foreground">In Progress</p>
-                                <p className="text-3xl font-bold">{stats.inProgress}</p>
+                                <p className="text-sm font-medium text-muted-foreground">Reading</p>
+                                <p className="text-3xl font-bold tracking-tight text-blue-600 dark:text-blue-400">{stats.inProgress}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="glass-card rounded-2xl p-6 group hover:glow-sm transition-all duration-300">
+                        <div className="flex items-center gap-4">
+                            <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-rose-500 to-pink-600 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                <BookOpen className="h-6 w-6 text-white" />
+                            </div>
+                            <div>
+                                <p className="text-sm font-medium text-muted-foreground">Dropped</p>
+                                <p className="text-3xl font-bold tracking-tight text-rose-600 dark:text-rose-400">{stats.dropped}</p>
                             </div>
                         </div>
                     </div>
@@ -109,13 +153,15 @@ export default async function HomePage() {
 
                 {/* Works List */}
                 {stats.total === 0 ? (
-                    <div className="flex flex-col items-center justify-center rounded-lg border border-dashed bg-muted/40 py-20">
-                        <BookOpen className="mb-4 h-16 w-16 text-muted-foreground/50" />
-                        <h2 className="mb-2 text-xl font-semibold">No works yet</h2>
-                        <p className="mb-6 text-center text-muted-foreground">
+                    <div className="glass-card rounded-2xl flex flex-col items-center justify-center py-20 animate-scale-in">
+                        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-violet-500/20 to-purple-600/20 mb-6">
+                            <BookOpen className="h-10 w-10 text-muted-foreground" />
+                        </div>
+                        <h2 className="mb-2 text-2xl font-bold">No works yet</h2>
+                        <p className="mb-6 text-center text-muted-foreground max-w-md">
                             Import your manga list to get started tracking your reading progress.
                         </p>
-                        <Button asChild>
+                        <Button className="gradient-primary text-white shadow-lg hover:shadow-xl transition-shadow" asChild>
                             <Link href="/import">
                                 <Upload className="mr-2 h-4 w-4" />
                                 Import your list
@@ -123,7 +169,9 @@ export default async function HomePage() {
                         </Button>
                     </div>
                 ) : (
-                    <WorkList initialWorks={works} />
+                    <div className="animate-slide-up">
+                        <WorkList initialWorks={works} />
+                    </div>
                 )}
             </main>
         </div>
