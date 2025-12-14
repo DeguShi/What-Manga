@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useRef } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Search, Filter, ChevronUp, ChevronDown, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -17,6 +17,8 @@ import type { Work } from '@prisma/client';
 
 interface WorkListProps {
     initialWorks: Work[];
+    initialFilter?: string;
+    onFilterChange?: (filter: string) => void;
 }
 
 type SortField = 'userIndex' | 'title' | 'score' | 'updatedAt';
@@ -38,15 +40,25 @@ const STATUS_LABELS: Record<string, string> = {
     DROPPED_HIATUS: 'Dropped',
 };
 
-export function WorkList({ initialWorks }: WorkListProps) {
+export function WorkList({ initialWorks, initialFilter = 'all', onFilterChange }: WorkListProps) {
     const [works, setWorks] = useState<Work[]>(initialWorks);
     const [search, setSearch] = useState('');
-    const [statusFilter, setStatusFilter] = useState<string>('all');
+    const [statusFilter, setStatusFilter] = useState<string>(initialFilter);
     const [sortField, setSortField] = useState<SortField>('userIndex');
     const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
     const [selectedWork, setSelectedWork] = useState<Work | null>(null);
 
     const parentRef = useRef<HTMLDivElement>(null);
+
+    // Sync external filter changes
+    useEffect(() => {
+        setStatusFilter(initialFilter);
+    }, [initialFilter]);
+
+    const handleFilterChange = (value: string) => {
+        setStatusFilter(value);
+        onFilterChange?.(value);
+    };
 
     const filteredAndSortedWorks = useMemo(() => {
         let result = [...works];
@@ -101,7 +113,7 @@ export function WorkList({ initialWorks }: WorkListProps) {
     const rowVirtualizer = useVirtualizer({
         count: filteredAndSortedWorks.length,
         getScrollElement: () => parentRef.current,
-        estimateSize: () => 64,
+        estimateSize: () => 56,
         overscan: 10,
     });
 
@@ -136,6 +148,7 @@ export function WorkList({ initialWorks }: WorkListProps) {
         );
     };
 
+
     return (
         <div className="space-y-4">
             {/* Premium Filters */}
@@ -157,7 +170,7 @@ export function WorkList({ initialWorks }: WorkListProps) {
                         </button>
                     )}
                 </div>
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <Select value={statusFilter} onValueChange={handleFilterChange}>
                     <SelectTrigger className="w-[160px] bg-background/50 border-white/10">
                         <Filter className="mr-2 h-4 w-4" />
                         <SelectValue placeholder="Filter status" />
@@ -171,6 +184,15 @@ export function WorkList({ initialWorks }: WorkListProps) {
                         <SelectItem value="DROPPED_HIATUS">Dropped</SelectItem>
                     </SelectContent>
                 </Select>
+                {statusFilter !== 'all' && (
+                    <button
+                        onClick={() => handleFilterChange('all')}
+                        className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                        <X className="h-3 w-3" />
+                        Clear filter
+                    </button>
+                )}
                 <div className="text-sm text-muted-foreground px-3 py-1.5 rounded-full bg-muted/50">
                     <span className="font-medium text-foreground">{filteredAndSortedWorks.length}</span> of {works.length} works
                 </div>
@@ -178,8 +200,8 @@ export function WorkList({ initialWorks }: WorkListProps) {
 
             {/* Premium Table */}
             <div className="glass-card rounded-2xl overflow-hidden">
-                {/* Table Header */}
-                <div className="grid grid-cols-[60px_1fr_120px_100px_80px] gap-2 px-4 py-3 bg-muted/30 border-b border-white/10 text-sm font-medium">
+                {/* Table Header - Fixed widths */}
+                <div className="grid grid-cols-[50px_1fr_110px_80px_60px] gap-2 px-4 py-3 bg-muted/30 border-b border-white/10 text-sm font-medium">
                     <button
                         onClick={() => toggleSort('userIndex')}
                         className="flex items-center hover:text-primary transition-colors"
@@ -221,34 +243,34 @@ export function WorkList({ initialWorks }: WorkListProps) {
                                 <div
                                     key={work.id}
                                     onClick={() => setSelectedWork(work)}
-                                    className="absolute top-0 left-0 w-full grid grid-cols-[60px_1fr_120px_100px_80px] gap-2 px-4 py-3 cursor-pointer table-row-premium border-b border-white/5"
+                                    className="absolute top-0 left-0 w-full grid grid-cols-[50px_1fr_110px_80px_60px] gap-2 px-4 cursor-pointer table-row-premium border-b border-white/5 items-center"
                                     style={{
                                         height: `${virtualRow.size}px`,
                                         transform: `translateY(${virtualRow.start}px)`,
                                     }}
                                 >
-                                    <span className="flex items-center text-sm text-muted-foreground font-mono">
+                                    <span className="text-sm text-muted-foreground font-mono">
                                         {work.userIndex}
                                     </span>
-                                    <span className="flex items-center">
+                                    <span className="flex items-center gap-2 min-w-0">
                                         <span className="font-medium truncate">{work.title}</span>
                                         {work.novelProgressRaw && (
-                                            <span className="ml-2 text-xs px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-500">
-                                                +Novel
+                                            <span className="flex-shrink-0 text-xs px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-500">
+                                                +N
                                             </span>
                                         )}
                                     </span>
                                     <span className="flex items-center">
-                                        <Badge variant={STATUS_BADGE_VARIANT[work.status]} className="text-xs">
+                                        <Badge variant={STATUS_BADGE_VARIANT[work.status]} className="text-xs truncate">
                                             {STATUS_LABELS[work.status]}
                                         </Badge>
                                     </span>
-                                    <span className="flex items-center text-sm">
+                                    <span className="text-sm truncate">
                                         {work.mangaProgressCurrent
                                             ? `Ch. ${work.mangaProgressCurrent}`
                                             : '-'}
                                     </span>
-                                    <span className={`flex items-center font-bold ${getScoreColor(work.score)}`}>
+                                    <span className={`font-bold text-sm ${getScoreColor(work.score)}`}>
                                         {work.score !== null ? work.score.toFixed(1) : '-'}
                                     </span>
                                 </div>
