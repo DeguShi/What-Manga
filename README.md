@@ -17,9 +17,11 @@
 
 ## Overview
 
-What-Manga is a personal manga and light novel tracking application. It features a custom text parser for bulk imports, real-time filtering, and a glassmorphism UI with dark mode support.
+What-Manga is a personal manga and light novel tracking application. It features a custom text parser for bulk imports, real-time filtering, and a manga-themed UI with dark mode support.
 
 Built as a full-stack Next.js application with Google OAuth authentication and PostgreSQL database.
+
+> **Why I built this:** I've always kept list-like tracking of all anime I've watched, books I've read, and manga I've read. Ideally, I would save my list somewhere like MyAnimeList or Anime-Planet. However, my list is just too big, so it was not realistic. Therefore, I decided to make this app :)
 
 ## Features
 
