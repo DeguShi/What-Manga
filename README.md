@@ -53,6 +53,13 @@ Built as a full-stack Next.js application with Google OAuth authentication and P
 - Admin role system via environment config
 - Protected routes with middleware
 
+### 👀 Demo Mode
+Non-admin users can explore the app with limited access:
+- **10 sample entries** displayed as a demo collection
+- **Read-only access** — all editing features are hidden
+- **Full UI experience** — view, search, filter, and explore the interface
+- Configure admin emails via `ADMIN_EMAILS` environment variable
+
 ### 📤 Export Options
 - CSV spreadsheet format
 - MyAnimeList XML format (MAL-compatible)
