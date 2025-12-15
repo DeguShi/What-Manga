@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import {
     Dialog,
-    DialogContent,
+    AnimatedDialogContent,
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
@@ -137,7 +137,11 @@ export function CreateEntryModal({ open, onClose, onCreated, nextIndex }: Create
 
     return (
         <Dialog open={open} onOpenChange={() => onClose()}>
-            <DialogContent className="w-[calc(100vw-2rem)] sm:max-w-md max-h-[85vh] overflow-y-auto glass-card border-white/20 dark:border-white/10 animate-scale-in">
+            <AnimatedDialogContent
+                open={open}
+                mobileSheet
+                className="w-[calc(100vw-2rem)] sm:max-w-md max-h-[85vh] overflow-y-auto glass-card border-white/20 dark:border-white/10"
+            >
                 <DialogHeader className="pb-4 border-b border-white/10">
                     <DialogTitle className="flex items-center gap-2 text-lg">
                         <div className="flex h-8 w-8 items-center justify-center rounded-lg gradient-primary">
@@ -339,7 +343,7 @@ export function CreateEntryModal({ open, onClose, onCreated, nextIndex }: Create
                         {isLoading ? 'Creating...' : 'Create'}
                     </Button>
                 </div>
-            </DialogContent>
+            </AnimatedDialogContent>
         </Dialog>
     );
 }

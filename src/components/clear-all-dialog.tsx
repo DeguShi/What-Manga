@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
     Dialog,
-    DialogContent,
+    AnimatedDialogContent,
     DialogHeader,
     DialogTitle,
     DialogDescription,
@@ -66,7 +66,11 @@ export function ClearAllDialog({ open, onClose, onCleared, totalCount }: ClearAl
 
     return (
         <Dialog open={open} onOpenChange={() => { setConfirmText(''); onClose(); }}>
-            <DialogContent className="w-[calc(100vw-2rem)] sm:max-w-md glass-card border-destructive/30 animate-scale-in">
+            <AnimatedDialogContent
+                open={open}
+                mobileSheet
+                className="w-[calc(100vw-2rem)] sm:max-w-md glass-card border-destructive/30"
+            >
                 <DialogHeader className="pb-4">
                     <div className="flex items-center gap-3">
                         <div className="flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
@@ -117,7 +121,7 @@ export function ClearAllDialog({ open, onClose, onCleared, totalCount }: ClearAl
                         {isLoading ? 'Deleting...' : 'Delete All'}
                     </Button>
                 </div>
-            </DialogContent>
+            </AnimatedDialogContent>
         </Dialog>
     );
 }
