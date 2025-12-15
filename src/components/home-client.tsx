@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
     BookOpen,
     Upload,
@@ -12,18 +13,27 @@ import {
     FileText,
     FileCode,
     Pause,
+    Plus,
+    Settings,
+    Trash2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { WorkList } from '@/components/work-list';
 import { ThemeToggleButton } from '@/components/theme-toggle';
+import { CreateEntryModal } from '@/components/create-entry-modal';
+import { ClearAllDialog } from '@/components/clear-all-dialog';
 import type { Work } from '@prisma/client';
 
 interface HomeClientProps {
     works: Work[];
 }
 
-export function HomeClient({ works }: HomeClientProps) {
+export function HomeClient({ works: initialWorks }: HomeClientProps) {
+    const router = useRouter();
+    const [works, setWorks] = useState(initialWorks);
     const [filter, setFilter] = useState('all');
+    const [showCreateModal, setShowCreateModal] = useState(false);
+    const [showClearDialog, setShowClearDialog] = useState(false);
 
     // Calculate stats from actual works data
     const stats = useMemo(() => {
@@ -34,8 +44,27 @@ export function HomeClient({ works }: HomeClientProps) {
         return { total, completed, inProgress, dropped };
     }, [works]);
 
+    // Get next index in sequence
+    const nextIndex = useMemo(() => {
+        if (works.length === 0) return 1;
+        return Math.max(...works.map(w => w.userIndex)) + 1;
+    }, [works]);
+
     const handleStatClick = (status: string) => {
         setFilter(filter === status ? 'all' : status);
+    };
+
+    const handleCreated = () => {
+        router.refresh();
+        // Also update local state by refetching
+        fetch('/api/works?limit=10000')
+            .then(res => res.json())
+            .then(data => setWorks(data.data || []));
+    };
+
+    const handleCleared = () => {
+        setWorks([]);
+        router.refresh();
     };
 
     return (
@@ -57,6 +86,16 @@ export function HomeClient({ works }: HomeClientProps) {
 
                     <div className="flex items-center gap-2">
                         <ThemeToggleButton />
+
+                        {/* + New Button */}
+                        <Button
+                            size="sm"
+                            className="gradient-primary text-white shadow-md hover:shadow-lg transition-shadow"
+                            onClick={() => setShowCreateModal(true)}
+                        >
+                            <Plus className="mr-1 h-4 w-4" />
+                            New
+                        </Button>
 
                         <Button variant="outline" size="sm" className="glass-button" asChild>
                             <Link href="/import">
@@ -88,6 +127,24 @@ export function HomeClient({ works }: HomeClientProps) {
                                         <FileCode className="h-4 w-4" />
                                         MAL XML Format
                                     </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Settings Dropdown */}
+                        <div className="relative group">
+                            <Button variant="outline" size="icon" className="glass-button h-9 w-9">
+                                <Settings className="h-4 w-4" />
+                            </Button>
+                            <div className="absolute right-0 mt-2 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                                <div className="glass-card rounded-lg p-1 shadow-xl">
+                                    <button
+                                        onClick={() => setShowClearDialog(true)}
+                                        className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md text-destructive hover:bg-destructive/10 transition-colors"
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                        Clear All Entries
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -175,14 +232,23 @@ export function HomeClient({ works }: HomeClientProps) {
                         </div>
                         <h2 className="mb-2 text-2xl font-bold">No works yet</h2>
                         <p className="mb-6 text-center text-muted-foreground max-w-md">
-                            Import your manga list to get started tracking your reading progress.
+                            Add your first manga or import your existing list to get started.
                         </p>
-                        <Button className="gradient-primary text-white shadow-lg hover:shadow-xl transition-shadow" asChild>
-                            <Link href="/import">
-                                <Upload className="mr-2 h-4 w-4" />
-                                Import your list
-                            </Link>
-                        </Button>
+                        <div className="flex gap-3">
+                            <Button
+                                className="gradient-primary text-white shadow-lg hover:shadow-xl transition-shadow"
+                                onClick={() => setShowCreateModal(true)}
+                            >
+                                <Plus className="mr-2 h-4 w-4" />
+                                Add First Entry
+                            </Button>
+                            <Button variant="outline" className="glass-button" asChild>
+                                <Link href="/import">
+                                    <Upload className="mr-2 h-4 w-4" />
+                                    Import List
+                                </Link>
+                            </Button>
+                        </div>
                     </div>
                 ) : (
                     <div className="animate-slide-up">
@@ -194,6 +260,21 @@ export function HomeClient({ works }: HomeClientProps) {
                     </div>
                 )}
             </main>
+
+            {/* Modals */}
+            <CreateEntryModal
+                open={showCreateModal}
+                onClose={() => setShowCreateModal(false)}
+                onCreated={handleCreated}
+                nextIndex={nextIndex}
+            />
+
+            <ClearAllDialog
+                open={showClearDialog}
+                onClose={() => setShowClearDialog(false)}
+                onCleared={handleCleared}
+                totalCount={stats.total}
+            />
         </div>
     );
 }
