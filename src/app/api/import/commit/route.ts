@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { auth } from '@/lib/auth';
+import { isAdmin } from '@/lib/admin-emails';
 import { z } from 'zod';
 import type { Status } from '@/lib/parser';
 
@@ -41,6 +42,12 @@ export async function POST(request: NextRequest) {
         if (!session?.user?.id) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
+
+        // Admin check - only admins can import
+        if (!isAdmin(session.user.email)) {
+            return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 });
+        }
+
         const userId = session.user.id;
 
         const body = await request.json();
