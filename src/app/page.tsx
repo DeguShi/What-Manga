@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/db';
 import { auth } from '@/lib/auth';
-import { isAdmin } from '@/lib/admin-emails';
+import { isAdmin, isViewer, getFirstAdminEmail } from '@/lib/admin-emails';
 import { HomeClient } from '@/components/home-client';
 
 // Demo data for non-admin users
@@ -30,6 +30,22 @@ async function getWorks(userId: string) {
     }
 }
 
+// Get the admin's userId by their email
+async function getAdminUserId(): Promise<string | null> {
+    const adminEmail = getFirstAdminEmail();
+    if (!adminEmail) return null;
+
+    try {
+        const adminUser = await prisma.user.findUnique({
+            where: { email: adminEmail },
+            select: { id: true },
+        });
+        return adminUser?.id || null;
+    } catch {
+        return null;
+    }
+}
+
 export default async function HomePage() {
     const session = await auth();
 
@@ -38,14 +54,24 @@ export default async function HomePage() {
         redirect('/auth/signin');
     }
 
-    // Check if admin
+    // Check roles
     const userIsAdmin = isAdmin(session.user.email);
+    const userIsViewer = isViewer(session.user.email);
 
-    // Admins get their own data, non-admins get demo data
-    const works = userIsAdmin && session.user.id
-        ? await getWorks(session.user.id)
-        : DEMO_WORKS;
+    // Determine what data to show
+    let works;
+    if (userIsAdmin && session.user.id) {
+        // Admin sees their own data
+        works = await getWorks(session.user.id);
+    } else if (userIsViewer) {
+        // Viewer sees admin's data (read-only)
+        const adminUserId = await getAdminUserId();
+        works = adminUserId ? await getWorks(adminUserId) : DEMO_WORKS;
+    } else {
+        // Everyone else sees demo data
+        works = DEMO_WORKS;
+    }
 
-    return <HomeClient works={works} isAdmin={userIsAdmin} />;
+    return <HomeClient works={works} isAdmin={userIsAdmin} isViewer={userIsViewer} />;
 }
 

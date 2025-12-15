@@ -30,9 +30,10 @@ import type { Work } from '@prisma/client';
 interface HomeClientProps {
     works: Work[];
     isAdmin?: boolean;
+    isViewer?: boolean;
 }
 
-export function HomeClient({ works: initialWorks, isAdmin = false }: HomeClientProps) {
+export function HomeClient({ works: initialWorks, isAdmin = false, isViewer = false }: HomeClientProps) {
     const router = useRouter();
     const [works, setWorks] = useState(initialWorks);
     const [filter, setFilter] = useState('all');
@@ -113,29 +114,25 @@ export function HomeClient({ works: initialWorks, isAdmin = false }: HomeClientP
                     <div className="flex items-center gap-1 sm:gap-2">
                         <ThemeToggleButton />
 
-                        {/* + New Button - Admin only */}
-                        {isAdmin && (
-                            <Button
-                                size="sm"
-                                className="gradient-primary text-white shadow-md hover:shadow-lg transition-shadow h-8 sm:h-9 px-2 sm:px-3"
-                                onClick={() => setShowCreateModal(true)}
-                            >
-                                <Plus className="h-4 w-4" />
-                                <span className="hidden sm:inline ml-1">New</span>
-                            </Button>
-                        )}
+                        {/* + New Button - Visible to all, blocked at API for non-admins */}
+                        <Button
+                            size="sm"
+                            className="gradient-primary text-white shadow-md hover:shadow-lg transition-shadow h-8 sm:h-9 px-2 sm:px-3"
+                            onClick={() => setShowCreateModal(true)}
+                        >
+                            <Plus className="h-4 w-4" />
+                            <span className="hidden sm:inline ml-1">New</span>
+                        </Button>
 
-                        {/* Import Button - Admin only */}
-                        {isAdmin && (
-                            <Button variant="outline" size="sm" className="glass-button h-8 sm:h-9 px-2 sm:px-3" asChild>
-                                <Link href="/import">
-                                    <Upload className="h-4 w-4" />
-                                    <span className="hidden sm:inline ml-2">Import</span>
-                                </Link>
-                            </Button>
-                        )}
+                        {/* Import Button - Visible to all, blocked at API for non-admins */}
+                        <Button variant="outline" size="sm" className="glass-button h-8 sm:h-9 px-2 sm:px-3" asChild>
+                            <Link href="/import">
+                                <Upload className="h-4 w-4" />
+                                <span className="hidden sm:inline ml-2">Import</span>
+                            </Link>
+                        </Button>
 
-                        {/* Export Dropdown */}
+                        {/* Export Dropdown - Visible to all */}
                         <div className="relative group">
                             <Button variant="outline" size="sm" className="glass-button h-8 sm:h-9 px-2 sm:px-3">
                                 <Download className="h-4 w-4" />
@@ -164,7 +161,7 @@ export function HomeClient({ works: initialWorks, isAdmin = false }: HomeClientP
                             </div>
                         </div>
 
-                        {/* Settings Dropdown */}
+                        {/* Settings Dropdown - Visible to all, Clear All only for admins */}
                         <div className="relative group">
                             <Button variant="outline" size="icon" className="glass-button h-9 w-9">
                                 <Settings className="h-4 w-4" />
@@ -172,15 +169,17 @@ export function HomeClient({ works: initialWorks, isAdmin = false }: HomeClientP
                             <div className="absolute right-0 mt-2 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                                 <div className="glass-card rounded-lg p-1 shadow-xl">
                                     {isAdmin && (
-                                        <button
-                                            onClick={() => setShowClearDialog(true)}
-                                            className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md text-destructive hover:bg-destructive/10 transition-colors"
-                                        >
-                                            <Trash2 className="h-4 w-4" />
-                                            Clear All Entries
-                                        </button>
+                                        <>
+                                            <button
+                                                onClick={() => setShowClearDialog(true)}
+                                                className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md text-destructive hover:bg-destructive/10 transition-colors"
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                                Clear All Entries
+                                            </button>
+                                            <hr className="my-1 border-white/10" />
+                                        </>
                                     )}
-                                    {isAdmin && <hr className="my-1 border-white/10" />}
                                     <button
                                         onClick={() => signOut({ callbackUrl: '/auth/signin' })}
                                         className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-muted transition-colors"
