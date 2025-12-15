@@ -11,11 +11,11 @@ const badgeVariants = cva(
                 secondary: 'border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80',
                 destructive: 'border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80',
                 outline: 'text-foreground',
-                // Status variants
-                'in-progress': 'border-transparent bg-blue-500/10 text-blue-600 dark:text-blue-400',
-                completed: 'border-transparent bg-green-500/10 text-green-600 dark:text-green-400',
-                incomplete: 'border-transparent bg-amber-500/10 text-amber-600 dark:text-amber-400',
-                uncertain: 'border-transparent bg-purple-500/10 text-purple-600 dark:text-purple-400',
+                // Status variants - warm color palette
+                'in-progress': 'border-transparent bg-amber-500/10 text-amber-600 dark:text-amber-400',
+                completed: 'border-transparent bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
+                incomplete: 'border-transparent bg-orange-500/10 text-orange-600 dark:text-orange-400',
+                uncertain: 'border-transparent bg-rose-500/10 text-rose-600 dark:text-rose-400',
                 dropped: 'border-transparent bg-red-500/10 text-red-600 dark:text-red-400',
             },
         },
