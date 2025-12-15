@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { auth } from '@/lib/auth';
 import { z } from 'zod';
 
 interface RouteParams {
@@ -8,6 +9,12 @@ interface RouteParams {
 
 export async function GET(request: NextRequest, { params }: RouteParams) {
     try {
+        // Auth check
+        const session = await auth();
+        if (!session?.user?.id) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
         const { id } = await params;
         const work = await prisma.work.findUnique({
             where: { id },
@@ -18,6 +25,11 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
                 { error: 'Work not found' },
                 { status: 404 }
             );
+        }
+
+        // Verify user owns this work
+        if (work.userId !== session.user.id) {
+            return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 
         return NextResponse.json(work);
@@ -48,7 +60,23 @@ const updateSchema = z.object({
 
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
     try {
+        // Auth check
+        const session = await auth();
+        if (!session?.user?.id) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
         const { id } = await params;
+
+        // Verify user owns this work
+        const existingWork = await prisma.work.findUnique({ where: { id } });
+        if (!existingWork) {
+            return NextResponse.json({ error: 'Work not found' }, { status: 404 });
+        }
+        if (existingWork.userId !== session.user.id) {
+            return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        }
+
         const body = await request.json();
         const data = updateSchema.parse(body);
 
@@ -75,7 +103,23 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
     try {
+        // Auth check
+        const session = await auth();
+        if (!session?.user?.id) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
         const { id } = await params;
+
+        // Verify user owns this work
+        const existingWork = await prisma.work.findUnique({ where: { id } });
+        if (!existingWork) {
+            return NextResponse.json({ error: 'Work not found' }, { status: 404 });
+        }
+        if (existingWork.userId !== session.user.id) {
+            return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        }
+
         await prisma.work.delete({
             where: { id },
         });
@@ -89,3 +133,4 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
         );
     }
 }
+

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { auth } from '@/lib/auth';
 import { z } from 'zod';
 import type { Status } from '@/lib/parser';
 
@@ -35,6 +36,13 @@ const commitSchema = z.object({
 
 export async function POST(request: NextRequest) {
     try {
+        // Auth check
+        const session = await auth();
+        if (!session?.user?.id) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+        const userId = session.user.id;
+
         const body = await request.json();
         const { entries, mode } = commitSchema.parse(body);
 
@@ -43,8 +51,10 @@ export async function POST(request: NextRequest) {
         const skipped = 0;
 
         if (mode === 'replace') {
-            // Delete all existing works
-            await prisma.work.deleteMany();
+            // Delete only THIS USER's existing works
+            await prisma.work.deleteMany({
+                where: { userId },
+            });
         }
 
         for (const entry of entries) {
@@ -60,6 +70,7 @@ export async function POST(request: NextRequest) {
                 novelProgressUnit: entry.novelProgress?.unit || null,
                 score: entry.score,
                 rawImportedText: entry.rawBlock,
+                userId, // Associate with current user
             };
 
             if (mode === 'add' || mode === 'replace') {
@@ -67,10 +78,11 @@ export async function POST(request: NextRequest) {
                 await prisma.work.create({ data: workData });
                 created++;
             } else if (mode === 'update') {
-                // Try to find existing by title (exact match, case sensitive)
+                // Try to find existing by title FOR THIS USER
                 const existing = await prisma.work.findFirst({
                     where: {
                         title: entry.title,
+                        userId, // Only find this user's works
                     },
                 });
                 if (existing) {
@@ -109,3 +121,4 @@ export async function POST(request: NextRequest) {
         );
     }
 }
+

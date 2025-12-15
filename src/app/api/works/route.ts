@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { auth } from '@/lib/auth';
 import { z } from 'zod';
 
 // Query params schema
@@ -16,6 +17,13 @@ const querySchema = z.object({
 
 export async function GET(request: NextRequest) {
     try {
+        // Auth check
+        const session = await auth();
+        if (!session?.user?.id) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+        const userId = session.user.id;
+
         const { searchParams } = new URL(request.url);
         const params = querySchema.parse({
             search: searchParams.get('search') || undefined,
@@ -32,8 +40,8 @@ export async function GET(request: NextRequest) {
         const limit = params.limit || 50;
         const skip = (page - 1) * limit;
 
-        // Build where clause
-        const where: Record<string, unknown> = {};
+        // Build where clause - ALWAYS filter by userId
+        const where: Record<string, unknown> = { userId };
 
         if (params.search) {
             where.title = {
@@ -111,11 +119,20 @@ const createSchema = z.object({
 
 export async function POST(request: NextRequest) {
     try {
+        // Auth check
+        const session = await auth();
+        if (!session?.user?.id) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
         const body = await request.json();
         const data = createSchema.parse(body);
 
         const work = await prisma.work.create({
-            data,
+            data: {
+                ...data,
+                userId: session.user.id, // Associate with current user
+            },
         });
 
         return NextResponse.json(work, { status: 201 });
@@ -133,3 +150,4 @@ export async function POST(request: NextRequest) {
         );
     }
 }
+
