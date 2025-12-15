@@ -20,6 +20,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
+import { STATUS_OPTIONS } from '@/lib/constants';
 
 interface CreateEntryModalProps {
     open: boolean;
@@ -27,14 +28,6 @@ interface CreateEntryModalProps {
     onCreated: () => void;
     nextIndex: number;
 }
-
-const STATUS_OPTIONS = [
-    { value: 'IN_PROGRESS', label: 'In Progress', symbol: '~' },
-    { value: 'COMPLETED', label: 'Completed', symbol: '*' },
-    { value: 'INCOMPLETE', label: 'Incomplete', symbol: '∆' },
-    { value: 'UNCERTAIN', label: 'Uncertain', symbol: '?' },
-    { value: 'DROPPED_HIATUS', label: 'Dropped/Hiatus', symbol: 'r.π' },
-];
 
 export function CreateEntryModal({ open, onClose, onCreated, nextIndex }: CreateEntryModalProps) {
     const { toast } = useToast();
@@ -207,7 +200,7 @@ export function CreateEntryModal({ open, onClose, onCreated, nextIndex }: Create
                     {/* Manga Progress */}
                     <div className="space-y-2">
                         <Label className="flex items-center gap-2 text-sm font-medium">
-                            <BookOpen className="h-4 w-4 text-blue-500" />
+                            <BookOpen className="h-4 w-4 text-amber-600" />
                             Manga Progress (Chapter)
                         </Label>
                         <div className="flex items-center gap-2">
@@ -247,10 +240,10 @@ export function CreateEntryModal({ open, onClose, onCreated, nextIndex }: Create
                             onClick={() => setShowNovel(!showNovel)}
                             className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
                         >
-                            <div className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-colors ${showNovel ? 'bg-purple-500 border-purple-500' : 'border-muted-foreground'}`}>
+                            <div className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-colors ${showNovel ? 'bg-rose-500 border-rose-500' : 'border-muted-foreground'}`}>
                                 {showNovel && <span className="text-white text-xs">✓</span>}
                             </div>
-                            <Scroll className="h-4 w-4 text-purple-500" />
+                            <Scroll className="h-4 w-4 text-rose-500" />
                             Include Novel Progress
                         </button>
 

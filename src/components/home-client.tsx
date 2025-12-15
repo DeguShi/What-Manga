@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -23,6 +23,7 @@ import { WorkList } from '@/components/work-list';
 import { ThemeToggleButton } from '@/components/theme-toggle';
 import { CreateEntryModal } from '@/components/create-entry-modal';
 import { ClearAllDialog } from '@/components/clear-all-dialog';
+import { useKeyboardShortcuts } from '@/hooks/use-keyboard-shortcuts';
 import { signOut } from 'next-auth/react';
 import type { Work } from '@prisma/client';
 
@@ -37,6 +38,17 @@ export function HomeClient({ works: initialWorks, isAdmin = false }: HomeClientP
     const [filter, setFilter] = useState('all');
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showClearDialog, setShowClearDialog] = useState(false);
+    const searchInputRef = useRef<HTMLInputElement>(null);
+
+    // Keyboard shortcuts
+    useKeyboardShortcuts({
+        onSearch: () => searchInputRef.current?.focus(),
+        onEscape: () => {
+            setShowCreateModal(false);
+            setShowClearDialog(false);
+        },
+        onNew: isAdmin ? () => setShowCreateModal(true) : undefined,
+    });
 
     // Sync works when prop changes (e.g., after navigation from import)
     useEffect(() => {
@@ -139,6 +151,7 @@ export function HomeClient({ works: initialWorks, isAdmin = false }: HomeClientP
                                         <FileText className="h-4 w-4" />
                                         CSV Spreadsheet
                                     </a>
+                                    {/* MAL export hidden - XML format not working 
                                     <a
                                         href="/api/export/mal"
                                         className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-primary/10 transition-colors"
@@ -146,6 +159,7 @@ export function HomeClient({ works: initialWorks, isAdmin = false }: HomeClientP
                                         <FileCode className="h-4 w-4" />
                                         MAL XML Format
                                     </a>
+                                    */}
                                 </div>
                             </div>
                         </div>
@@ -187,16 +201,16 @@ export function HomeClient({ works: initialWorks, isAdmin = false }: HomeClientP
                     {/* Total */}
                     <button
                         onClick={() => handleStatClick('all')}
-                        className={`glass-card rounded-2xl p-6 group hover:glow-sm transition-all duration-300 text-left ${filter === 'all' ? 'ring-2 ring-primary/50' : ''
+                        className={`glass-card rounded-2xl p-6 group hover:-translate-y-1 hover:shadow-xl transition-all duration-300 text-left ${filter === 'all' ? 'ring-2 ring-primary/50' : ''
                             }`}
                     >
                         <div className="flex items-center gap-4">
-                            <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                            <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-rose-500 to-red-600 shadow-lg transition-transform duration-300">
                                 <List className="h-6 w-6 text-white" />
                             </div>
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">Total Works</p>
-                                <p className="text-3xl font-bold tracking-tight">{stats.total}</p>
+                                <p className="text-3xl text-display font-bold tracking-tight">{stats.total}</p>
                             </div>
                         </div>
                     </button>
@@ -204,16 +218,16 @@ export function HomeClient({ works: initialWorks, isAdmin = false }: HomeClientP
                     {/* Completed */}
                     <button
                         onClick={() => handleStatClick('COMPLETED')}
-                        className={`glass-card rounded-2xl p-6 group hover:glow-sm transition-all duration-300 text-left ${filter === 'COMPLETED' ? 'ring-2 ring-emerald-500/50' : ''
+                        className={`glass-card rounded-2xl p-6 group hover:-translate-y-1 hover:shadow-xl transition-all duration-300 text-left ${filter === 'COMPLETED' ? 'ring-2 ring-emerald-500/50' : ''
                             }`}
                     >
                         <div className="flex items-center gap-4">
-                            <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                            <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 shadow-lg transition-transform duration-300">
                                 <Check className="h-6 w-6 text-white" />
                             </div>
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">Completed</p>
-                                <p className="text-3xl font-bold tracking-tight text-emerald-600 dark:text-emerald-400">{stats.completed}</p>
+                                <p className="text-3xl text-display font-bold tracking-tight text-emerald-600 dark:text-emerald-400">{stats.completed}</p>
                             </div>
                         </div>
                     </button>
@@ -221,16 +235,16 @@ export function HomeClient({ works: initialWorks, isAdmin = false }: HomeClientP
                     {/* In Progress */}
                     <button
                         onClick={() => handleStatClick('IN_PROGRESS')}
-                        className={`glass-card rounded-2xl p-6 group hover:glow-sm transition-all duration-300 text-left ${filter === 'IN_PROGRESS' ? 'ring-2 ring-blue-500/50' : ''
+                        className={`glass-card rounded-2xl p-6 group hover:-translate-y-1 hover:shadow-xl transition-all duration-300 text-left ${filter === 'IN_PROGRESS' ? 'ring-2 ring-amber-500/50' : ''
                             }`}
                     >
                         <div className="flex items-center gap-4">
-                            <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                            <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 shadow-lg transition-transform duration-300">
                                 <BookOpen className="h-6 w-6 text-white" />
                             </div>
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">Reading</p>
-                                <p className="text-3xl font-bold tracking-tight text-blue-600 dark:text-blue-400">{stats.inProgress}</p>
+                                <p className="text-3xl text-display font-bold tracking-tight text-amber-600 dark:text-amber-400">{stats.inProgress}</p>
                             </div>
                         </div>
                     </button>
@@ -238,16 +252,16 @@ export function HomeClient({ works: initialWorks, isAdmin = false }: HomeClientP
                     {/* Dropped */}
                     <button
                         onClick={() => handleStatClick('DROPPED_HIATUS')}
-                        className={`glass-card rounded-2xl p-6 group hover:glow-sm transition-all duration-300 text-left ${filter === 'DROPPED_HIATUS' ? 'ring-2 ring-rose-500/50' : ''
+                        className={`glass-card rounded-2xl p-6 group hover:-translate-y-1 hover:shadow-xl transition-all duration-300 text-left ${filter === 'DROPPED_HIATUS' ? 'ring-2 ring-rose-500/50' : ''
                             }`}
                     >
                         <div className="flex items-center gap-4">
-                            <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-rose-500 to-pink-600 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                            <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-rose-500 to-pink-600 shadow-lg transition-transform duration-300">
                                 <Pause className="h-6 w-6 text-white" />
                             </div>
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">Dropped</p>
-                                <p className="text-3xl font-bold tracking-tight text-rose-600 dark:text-rose-400">{stats.dropped}</p>
+                                <p className="text-3xl text-display font-bold tracking-tight text-rose-600 dark:text-rose-400">{stats.dropped}</p>
                             </div>
                         </div>
                     </button>
@@ -256,7 +270,7 @@ export function HomeClient({ works: initialWorks, isAdmin = false }: HomeClientP
                 {/* Works List */}
                 {stats.total === 0 ? (
                     <div className="glass-card rounded-2xl flex flex-col items-center justify-center py-20 animate-scale-in">
-                        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-violet-500/20 to-purple-600/20 mb-6">
+                        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-rose-500/20 to-red-600/20 mb-6">
                             <BookOpen className="h-10 w-10 text-muted-foreground" />
                         </div>
                         <h2 className="mb-2 text-2xl font-bold">No works yet</h2>
@@ -285,6 +299,7 @@ export function HomeClient({ works: initialWorks, isAdmin = false }: HomeClientP
                             initialWorks={works}
                             initialFilter={filter}
                             onFilterChange={setFilter}
+                            searchInputRef={searchInputRef}
                         />
                     </div>
                 )}

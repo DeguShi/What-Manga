@@ -118,10 +118,10 @@ const DialogContent = React.forwardRef<
                     // Base styles - now relative positioned as flex child
                     'relative z-50 grid gap-4 border bg-background p-6 shadow-xl',
                     // Default dialog styling (flexbox handles centering)
-                    !mobileSheet && 'w-full max-w-lg rounded-xl',
-                    // Mobile sheet: fixed to bottom on small screens, centered on larger
-                    mobileSheet && 'sm:w-full sm:max-w-lg sm:rounded-xl',
-                    mobileSheet && 'max-sm:fixed max-sm:bottom-0 max-sm:left-0 max-sm:right-0 max-sm:rounded-t-2xl max-sm:rounded-b-none max-sm:max-h-[90vh]',
+                    !mobileSheet && 'w-full max-w-lg rounded-xl mx-4 sm:mx-0',
+                    // Mobile sheet: bottom sheet on mobile, centered dialog on desktop
+                    mobileSheet && 'w-[calc(100%-2rem)] max-w-lg rounded-xl mx-4 sm:mx-0',
+                    mobileSheet && 'max-sm:fixed max-sm:bottom-0 max-sm:left-0 max-sm:right-0 max-sm:w-full max-sm:mx-0 max-sm:rounded-t-2xl max-sm:rounded-b-none max-sm:max-h-[85vh] max-sm:overflow-y-auto',
                     className
                 )}
             >

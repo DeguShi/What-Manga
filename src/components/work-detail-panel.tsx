@@ -33,6 +33,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
+import { STATUS_OPTIONS, STATUS_BADGE_VARIANT, STATUS_LABELS, getScoreColor, type Status } from '@/lib/constants';
 import type { Work } from '@prisma/client';
 
 interface WorkDetailPanelProps {
@@ -41,30 +42,6 @@ interface WorkDetailPanelProps {
     onClose: () => void;
     onUpdate: (work: Work) => void;
 }
-
-const STATUS_OPTIONS = [
-    { value: 'IN_PROGRESS', label: 'In Progress', symbol: '~', color: 'text-blue-500' },
-    { value: 'COMPLETED', label: 'Completed', symbol: '*', color: 'text-emerald-500' },
-    { value: 'INCOMPLETE', label: 'Incomplete', symbol: '∆', color: 'text-amber-500' },
-    { value: 'UNCERTAIN', label: 'Uncertain', symbol: '?', color: 'text-purple-500' },
-    { value: 'DROPPED_HIATUS', label: 'Dropped/Hiatus', symbol: 'r.π', color: 'text-rose-500' },
-];
-
-const STATUS_BADGE_VARIANT: Record<string, 'in-progress' | 'completed' | 'incomplete' | 'uncertain' | 'dropped'> = {
-    IN_PROGRESS: 'in-progress',
-    COMPLETED: 'completed',
-    INCOMPLETE: 'incomplete',
-    UNCERTAIN: 'uncertain',
-    DROPPED_HIATUS: 'dropped',
-};
-
-const STATUS_LABELS: Record<string, string> = {
-    IN_PROGRESS: 'In Progress',
-    COMPLETED: 'Completed',
-    INCOMPLETE: 'Incomplete',
-    UNCERTAIN: 'Uncertain',
-    DROPPED_HIATUS: 'Dropped',
-};
 
 export function WorkDetailPanel({
     work,
@@ -190,9 +167,9 @@ export function WorkDetailPanel({
                         <div className="space-y-4 animate-fade-in">
                             {/* Status & Score Row */}
                             <div className="flex items-center justify-between">
-                                <Badge variant={STATUS_BADGE_VARIANT[work.status]} className="text-sm px-3 py-1">
+                                <Badge variant={STATUS_BADGE_VARIANT[work.status as Status]} className="text-sm px-3 py-1">
                                     <span className="mr-1.5">{statusOption?.symbol}</span>
-                                    {STATUS_LABELS[work.status]}
+                                    {STATUS_LABELS[work.status as Status]}
                                 </Badge>
                                 {work.score && (
                                     <div className="flex items-center gap-1.5">
@@ -207,14 +184,14 @@ export function WorkDetailPanel({
                             {/* Progress Cards */}
                             <div className="grid gap-3">
                                 {work.mangaProgressRaw && (
-                                    <div className="flex items-center gap-3 p-3 rounded-xl bg-blue-500/5 border border-blue-500/10">
-                                        <BookOpen className="h-5 w-5 text-blue-500" />
+                                    <div className="flex items-center gap-3 p-3 rounded-xl bg-amber-500/5 border border-amber-500/10">
+                                        <BookOpen className="h-5 w-5 text-amber-600" />
                                         <div className="flex-1">
                                             <p className="text-sm font-medium">Manga Progress</p>
                                             <p className="text-xs text-muted-foreground">{work.mangaProgressRaw}</p>
                                         </div>
                                         {work.mangaProgressCurrent && (
-                                            <span className="text-lg font-bold text-blue-500">
+                                            <span className="text-lg font-bold text-amber-600">
                                                 Ch. {work.mangaProgressCurrent}
                                             </span>
                                         )}
@@ -222,14 +199,14 @@ export function WorkDetailPanel({
                                 )}
 
                                 {work.novelProgressRaw && (
-                                    <div className="flex items-center gap-3 p-3 rounded-xl bg-purple-500/5 border border-purple-500/10">
-                                        <Scroll className="h-5 w-5 text-purple-500" />
+                                    <div className="flex items-center gap-3 p-3 rounded-xl bg-rose-500/5 border border-rose-500/10">
+                                        <Scroll className="h-5 w-5 text-rose-500" />
                                         <div className="flex-1">
                                             <p className="text-sm font-medium">Novel Progress</p>
                                             <p className="text-xs text-muted-foreground">{work.novelProgressRaw}</p>
                                         </div>
                                         {work.novelProgressCurrent && (
-                                            <span className="text-lg font-bold text-purple-500">
+                                            <span className="text-lg font-bold text-rose-500">
                                                 Ch. {work.novelProgressCurrent}
                                             </span>
                                         )}
@@ -307,7 +284,7 @@ export function WorkDetailPanel({
                             {/* Manga Progress */}
                             <div className="space-y-2">
                                 <Label className="flex items-center gap-2 text-sm font-medium">
-                                    <BookOpen className="h-4 w-4 text-blue-500" />
+                                    <BookOpen className="h-4 w-4 text-amber-600" />
                                     Manga Progress
                                 </Label>
                                 <div className="flex items-center gap-2">
@@ -346,7 +323,7 @@ export function WorkDetailPanel({
                             {(work.novelProgressRaw || formData.novelProgressCurrent > 0) && (
                                 <div className="space-y-2">
                                     <Label className="flex items-center gap-2 text-sm font-medium">
-                                        <Scroll className="h-4 w-4 text-purple-500" />
+                                        <Scroll className="h-4 w-4 text-rose-500" />
                                         Novel Progress
                                     </Label>
                                     <div className="flex items-center gap-2">

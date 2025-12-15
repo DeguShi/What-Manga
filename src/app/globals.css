@@ -2,28 +2,51 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * MANGA-THEMED DESIGN SYSTEM
+ * Visual identity: Bold ink strokes, paper textures, panel aesthetics
+ * Primary accent: Crimson red (manga passion)
+ * Secondary: Deep ink black with warm paper whites
+ */
+
 @layer base {
   :root {
-    --background: 220 20% 97%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 262 83% 58%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 220 14.3% 95.9%;
-    --secondary-foreground: 220.9 39.3% 11%;
-    --muted: 220 14.3% 95.9%;
-    --muted-foreground: 220 8.9% 46.1%;
-    --accent: 220 14.3% 95.9%;
-    --accent-foreground: 220.9 39.3% 11%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 262 83% 58%;
-    --radius: 0.625rem;
+    /* Base palette - warm paper whites (like manga pages) */
+    --background: 40 25% 96%;
+    --foreground: 0 0% 8%;
+
+    /* Surfaces - aged paper warmth */
+    --card: 40 30% 97%;
+    --card-foreground: 0 0% 8%;
+    --popover: 40 25% 98%;
+    --popover-foreground: 0 0% 8%;
+
+    /* Primary - refined wine red (manga accent) */
+    --primary: 355 75% 45%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary - warm ink gray */
+    --secondary: 30 10% 90%;
+    --secondary-foreground: 0 0% 15%;
+
+    /* Muted - paper shadow */
+    --muted: 35 15% 90%;
+    --muted-foreground: 0 0% 35%;
+
+    /* Accent - warm gold (like vintage manga covers) */
+    --accent: 38 85% 50%;
+    --accent-foreground: 0 0% 8%;
+
+    /* Status & Feedback */
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Borders - ink stroke style */
+    --border: 30 10% 82%;
+    --input: 30 10% 88%;
+    --ring: 355 75% 45%;
+
+    --radius: 0.5rem;
 
     /* Spacing tokens */
     --space-1: 0.25rem;
@@ -45,25 +68,35 @@
   }
 
   .dark {
-    --background: 224 71% 4%;
-    --foreground: 213 31% 91%;
-    --card: 224 71% 4%;
-    --card-foreground: 213 31% 91%;
-    --popover: 224 71% 6%;
-    --popover-foreground: 213 31% 91%;
-    --primary: 263 70% 60%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 222.2 47.4% 11.2%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 223 47% 11%;
-    --muted-foreground: 215.4 16.3% 56.9%;
-    --accent: 216 34% 17%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 216 34% 17%;
-    --input: 216 34% 17%;
-    --ring: 263 70% 60%;
+    /* Dark mode - deep ink black with warm paper contrast */
+    --background: 0 0% 5%;
+    --foreground: 40 20% 90%;
+
+    --card: 0 0% 8%;
+    --card-foreground: 40 20% 90%;
+    --popover: 0 0% 7%;
+    --popover-foreground: 40 20% 90%;
+
+    /* Primary - wine red pops beautifully on dark */
+    --primary: 355 80% 55%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 0 0% 14%;
+    --secondary-foreground: 40 15% 82%;
+
+    --muted: 0 0% 11%;
+    --muted-foreground: 0 0% 50%;
+
+    /* Accent - warm gold for dark mode */
+    --accent: 38 80% 48%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 16%;
+    --input: 0 0% 14%;
+    --ring: 355 80% 55%;
 
     /* Dark mode shadow tokens */
     --shadow-color: 0 0% 0%;
@@ -82,6 +115,46 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Typography system - distinct heading hierarchy */
+  h1,
+  .heading-1 {
+    font-family: var(--font-display), system-ui, sans-serif;
+    @apply text-3xl sm:text-4xl font-bold tracking-tight;
+  }
+
+  h2,
+  .heading-2 {
+    font-family: var(--font-display), system-ui, sans-serif;
+    @apply text-2xl sm:text-3xl font-semibold tracking-tight;
+  }
+
+  h3,
+  .heading-3 {
+    font-family: var(--font-display), system-ui, sans-serif;
+    @apply text-xl sm:text-2xl font-semibold;
+  }
+
+  h4,
+  .heading-4 {
+    font-family: var(--font-display), system-ui, sans-serif;
+    @apply text-lg font-medium;
+  }
+
+  /* Display text - for stats, numbers, emphasis */
+  .text-display {
+    font-family: var(--font-display), system-ui, sans-serif;
+    @apply font-bold tracking-tight;
+  }
+
+  /* Body text improvements */
+  .text-body {
+    @apply text-base leading-relaxed;
+  }
+
+  .text-body-sm {
+    @apply text-sm leading-relaxed;
   }
 }
 
@@ -112,34 +185,34 @@
     @apply bg-slate-800/80 backdrop-blur-sm border border-white/5 hover:bg-slate-700/80 hover:border-white/10 transition-all duration-200;
   }
 
-  /* Premium Gradients */
+  /* Premium Gradients - Manga Crimson */
   .gradient-primary {
-    @apply bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600;
+    @apply bg-gradient-to-r from-red-600 via-rose-600 to-red-500;
   }
 
   .gradient-border {
-    background: linear-gradient(to right, hsl(var(--primary)), hsl(263 70% 70%));
+    background: linear-gradient(to right, hsl(var(--primary)), hsl(0 70% 60%));
   }
 
-  /* Mesh Gradient Background - Light */
+  /* Mesh Gradient Background - Light (subtle red accents) */
   .mesh-gradient {
     background-color: hsl(var(--background));
     background-image:
-      radial-gradient(at 40% 20%, hsla(262, 83%, 58%, 0.08) 0px, transparent 50%),
-      radial-gradient(at 80% 0%, hsla(189, 100%, 56%, 0.06) 0px, transparent 50%),
-      radial-gradient(at 0% 50%, hsla(355, 100%, 93%, 0.06) 0px, transparent 50%),
-      radial-gradient(at 80% 50%, hsla(340, 100%, 76%, 0.06) 0px, transparent 50%),
-      radial-gradient(at 0% 100%, hsla(262, 83%, 58%, 0.06) 0px, transparent 50%);
+      radial-gradient(at 40% 20%, hsla(0, 85%, 55%, 0.06) 0px, transparent 50%),
+      radial-gradient(at 80% 0%, hsla(35, 90%, 55%, 0.04) 0px, transparent 50%),
+      radial-gradient(at 0% 50%, hsla(0, 70%, 45%, 0.04) 0px, transparent 50%),
+      radial-gradient(at 80% 50%, hsla(340, 80%, 50%, 0.04) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, hsla(0, 85%, 50%, 0.05) 0px, transparent 50%);
   }
 
-  /* Mesh Gradient Background - Dark */
+  /* Mesh Gradient Background - Dark (crimson glows) */
   .dark .mesh-gradient {
     background-image:
-      radial-gradient(at 40% 20%, hsla(262, 83%, 58%, 0.12) 0px, transparent 50%),
-      radial-gradient(at 80% 0%, hsla(189, 80%, 40%, 0.08) 0px, transparent 50%),
-      radial-gradient(at 0% 50%, hsla(355, 70%, 40%, 0.06) 0px, transparent 50%),
-      radial-gradient(at 80% 50%, hsla(340, 70%, 40%, 0.06) 0px, transparent 50%),
-      radial-gradient(at 0% 100%, hsla(262, 70%, 40%, 0.08) 0px, transparent 50%);
+      radial-gradient(at 40% 20%, hsla(0, 90%, 55%, 0.15) 0px, transparent 50%),
+      radial-gradient(at 80% 0%, hsla(35, 85%, 50%, 0.08) 0px, transparent 50%),
+      radial-gradient(at 0% 50%, hsla(0, 70%, 40%, 0.08) 0px, transparent 50%),
+      radial-gradient(at 80% 50%, hsla(340, 75%, 45%, 0.06) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, hsla(0, 70%, 45%, 0.1) 0px, transparent 50%);
   }
 
   /* Custom scrollbar */
@@ -164,6 +237,121 @@
 
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
     background: hsl(var(--muted-foreground) / 0.5);
+  }
+
+  /* ===============================================
+   * MANGA-THEMED VISUAL EFFECTS
+   * Distinctive design elements inspired by manga aesthetics
+   * =============================================== */
+
+  /* Ink border - bold manga panel style */
+  .ink-border {
+    border: 2px solid hsl(var(--foreground));
+    box-shadow:
+      3px 3px 0 0 hsl(var(--foreground) / 0.15),
+      inset 0 0 0 1px hsl(var(--background) / 0.5);
+  }
+
+  .dark .ink-border {
+    border-color: hsl(var(--foreground) / 0.8);
+    box-shadow:
+      3px 3px 0 0 hsl(var(--primary) / 0.2),
+      inset 0 0 0 1px hsl(var(--background) / 0.3);
+  }
+
+  /* Panel frame - manga panel aesthetic */
+  .panel-frame {
+    position: relative;
+    border: 1px solid hsl(var(--border));
+    background: hsl(var(--card));
+  }
+
+  .panel-frame::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border: 2px solid hsl(var(--foreground) / 0.1);
+    border-radius: inherit;
+    pointer-events: none;
+  }
+
+  /* Accent corner - decorative manga corner flourish */
+  .accent-corner::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 24px;
+    height: 24px;
+    background: linear-gradient(135deg, transparent 50%, hsl(var(--primary) / 0.15) 50%);
+    border-radius: 0 var(--radius) 0 0;
+  }
+
+  /* Brush stroke accent - subtle ink wash effect */
+  .brush-accent {
+    position: relative;
+  }
+
+  .brush-accent::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg,
+        transparent 0%,
+        hsl(var(--primary) / 0.6) 10%,
+        hsl(var(--primary)) 50%,
+        hsl(var(--primary) / 0.6) 90%,
+        transparent 100%);
+    border-radius: 2px;
+  }
+
+  /* Speed lines effect - for emphasis (use sparingly) */
+  .speed-lines {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .speed-lines::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(90deg,
+        transparent,
+        transparent 20px,
+        hsl(var(--foreground) / 0.02) 20px,
+        hsl(var(--foreground) / 0.02) 21px);
+    pointer-events: none;
+  }
+
+  /* Manga card - combines panel + accent for cards */
+  .manga-card {
+    position: relative;
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    border-left: 3px solid hsl(var(--primary));
+    transition: all 0.2s ease;
+  }
+
+  .manga-card:hover {
+    border-left-color: hsl(var(--primary));
+    box-shadow:
+      0 4px 12px hsl(var(--primary) / 0.1),
+      0 1px 3px hsl(var(--foreground) / 0.05);
+  }
+
+  .dark .manga-card:hover {
+    box-shadow:
+      0 4px 12px hsl(var(--primary) / 0.15),
+      0 1px 3px hsl(0 0% 0% / 0.3);
   }
 
   /* Animations */

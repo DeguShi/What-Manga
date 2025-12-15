@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Filter, ChevronUp, ChevronDown, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -13,34 +14,41 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { WorkDetailPanel } from '@/components/work-detail-panel';
+import { WorkCard } from '@/components/work-card';
+import { STATUS_LABELS, STATUS_BADGE_VARIANT, getScoreColor, type Status } from '@/lib/constants';
+import { staggerContainer, listItemVariants, springs } from '@/lib/motion';
 import type { Work } from '@prisma/client';
 
 interface WorkListProps {
     initialWorks: Work[];
     initialFilter?: string;
     onFilterChange?: (filter: string) => void;
+    searchInputRef?: React.RefObject<HTMLInputElement>;
 }
 
 type SortField = 'userIndex' | 'title' | 'score' | 'updatedAt';
 type SortOrder = 'asc' | 'desc';
 
-const STATUS_BADGE_VARIANT: Record<string, 'in-progress' | 'completed' | 'incomplete' | 'uncertain' | 'dropped'> = {
-    IN_PROGRESS: 'in-progress',
-    COMPLETED: 'completed',
-    INCOMPLETE: 'incomplete',
-    UNCERTAIN: 'uncertain',
-    DROPPED_HIATUS: 'dropped',
-};
+// Hook to detect mobile viewport
+function useIsMobile() {
+    const [isMobile, setIsMobile] = useState(false);
 
-const STATUS_LABELS: Record<string, string> = {
-    IN_PROGRESS: 'In Progress',
-    COMPLETED: 'Completed',
-    INCOMPLETE: 'Incomplete',
-    UNCERTAIN: 'Uncertain',
-    DROPPED_HIATUS: 'Dropped',
-};
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth < 640);
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
-export function WorkList({ initialWorks, initialFilter = 'all', onFilterChange }: WorkListProps) {
+    return isMobile;
+}
+
+export function WorkList({
+    initialWorks,
+    initialFilter = 'all',
+    onFilterChange,
+    searchInputRef,
+}: WorkListProps) {
     const [works, setWorks] = useState<Work[]>(initialWorks);
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState<string>(initialFilter);
@@ -49,8 +57,9 @@ export function WorkList({ initialWorks, initialFilter = 'all', onFilterChange }
     const [selectedWork, setSelectedWork] = useState<Work | null>(null);
 
     const parentRef = useRef<HTMLDivElement>(null);
+    const isMobile = useIsMobile();
 
-    // Sync works when initialWorks prop changes (e.g., after import)
+    // Sync works when initialWorks prop changes
     useEffect(() => {
         setWorks(initialWorks);
     }, [initialWorks]);
@@ -114,12 +123,13 @@ export function WorkList({ initialWorks, initialFilter = 'all', onFilterChange }
         return result;
     }, [works, search, statusFilter, sortField, sortOrder]);
 
-    // Virtual scrolling
+    // Virtual scrolling for desktop table
     const rowVirtualizer = useVirtualizer({
         count: filteredAndSortedWorks.length,
         getScrollElement: () => parentRef.current,
         estimateSize: () => 56,
         overscan: 10,
+        enabled: !isMobile, // Disable for mobile
     });
 
     const toggleSort = (field: SortField) => {
@@ -137,13 +147,6 @@ export function WorkList({ initialWorks, initialFilter = 'all', onFilterChange }
         );
     };
 
-    const getScoreColor = (score: number | null) => {
-        if (score === null) return 'text-muted-foreground';
-        if (score >= 8) return 'text-emerald-500';
-        if (score >= 6) return 'text-amber-500';
-        return 'text-rose-500';
-    };
-
     const SortIcon = ({ field }: { field: SortField }) => {
         if (sortField !== field) return null;
         return sortOrder === 'asc' ? (
@@ -153,15 +156,15 @@ export function WorkList({ initialWorks, initialFilter = 'all', onFilterChange }
         );
     };
 
-
     return (
         <div className="space-y-4">
-            {/* Premium Filters */}
+            {/* Filters */}
             <div className="flex flex-wrap items-center gap-3 p-4 glass-card rounded-2xl">
                 <div className="relative flex-1 min-w-[200px]">
                     <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
-                        placeholder="Search titles..."
+                        ref={searchInputRef}
+                        placeholder="Search titles... (press /)"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         className="pl-10 bg-background/50 border-white/10"
@@ -203,94 +206,120 @@ export function WorkList({ initialWorks, initialFilter = 'all', onFilterChange }
                 </div>
             </div>
 
-            {/* Premium Table */}
-            <div className="glass-card rounded-2xl overflow-hidden">
-                {/* Table Header - Fixed widths */}
-                <div className="grid grid-cols-[50px_1fr_110px_80px_60px] gap-2 px-4 py-3 bg-muted/30 border-b border-white/10 text-sm font-medium">
-                    <button
-                        onClick={() => toggleSort('userIndex')}
-                        className="flex items-center hover:text-primary transition-colors"
-                    >
-                        #<SortIcon field="userIndex" />
-                    </button>
-                    <button
-                        onClick={() => toggleSort('title')}
-                        className="flex items-center hover:text-primary transition-colors"
-                    >
-                        Title<SortIcon field="title" />
-                    </button>
-                    <span>Status</span>
-                    <span>Progress</span>
-                    <button
-                        onClick={() => toggleSort('score')}
-                        className="flex items-center hover:text-primary transition-colors"
-                    >
-                        Score<SortIcon field="score" />
-                    </button>
+            {/* Mobile: Card Grid */}
+            {isMobile ? (
+                <div className="grid gap-4 px-2 w-full max-w-full overflow-hidden">
+                    {filteredAndSortedWorks.map((work, index) => (
+                        <WorkCard
+                            key={work.id}
+                            work={work}
+                            index={Math.min(index, 10)} // Cap stagger delay
+                            onClick={() => setSelectedWork(work)}
+                        />
+                    ))}
                 </div>
+            ) : (
+                /* Desktop: Table */
+                <div className="glass-card rounded-2xl overflow-hidden">
+                    {/* Table Header */}
+                    <div className="grid grid-cols-[50px_1fr_110px_80px_60px] gap-2 px-4 py-3 bg-muted/30 border-b border-white/10 text-sm font-medium">
+                        <button
+                            onClick={() => toggleSort('userIndex')}
+                            className="flex items-center hover:text-primary transition-colors"
+                        >
+                            #<SortIcon field="userIndex" />
+                        </button>
+                        <button
+                            onClick={() => toggleSort('title')}
+                            className="flex items-center hover:text-primary transition-colors"
+                        >
+                            Title<SortIcon field="title" />
+                        </button>
+                        <span>Status</span>
+                        <span>Progress</span>
+                        <button
+                            onClick={() => toggleSort('score')}
+                            className="flex items-center hover:text-primary transition-colors"
+                        >
+                            Score<SortIcon field="score" />
+                        </button>
+                    </div>
 
-                {/* Virtual Scroll Container */}
-                <div
-                    ref={parentRef}
-                    className="overflow-auto scrollbar-thin"
-                    style={{ maxHeight: 'calc(100vh - 380px)', minHeight: '400px' }}
-                >
+                    {/* Virtual Scroll Container */}
                     <div
-                        style={{
-                            height: `${rowVirtualizer.getTotalSize()}px`,
-                            width: '100%',
-                            position: 'relative',
-                        }}
+                        ref={parentRef}
+                        className="overflow-auto scrollbar-thin"
+                        style={{ maxHeight: 'calc(100vh - 380px)', minHeight: '400px' }}
                     >
-                        {rowVirtualizer.getVirtualItems().map((virtualRow) => {
-                            const work = filteredAndSortedWorks[virtualRow.index];
-                            return (
-                                <div
-                                    key={work.id}
-                                    onClick={() => setSelectedWork(work)}
-                                    className="absolute top-0 left-0 w-full grid grid-cols-[50px_1fr_110px_80px_60px] gap-2 px-4 cursor-pointer table-row-premium border-b border-white/5 items-center"
-                                    style={{
-                                        height: `${virtualRow.size}px`,
-                                        transform: `translateY(${virtualRow.start}px)`,
-                                    }}
-                                >
-                                    <span className="text-sm text-muted-foreground font-mono">
-                                        {work.userIndex}
-                                    </span>
-                                    <span className="flex items-center gap-2 min-w-0">
-                                        <span className="font-medium truncate">{work.title}</span>
-                                        {work.novelProgressRaw && (
-                                            <span className="flex-shrink-0 text-xs px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-500">
-                                                +N
-                                            </span>
-                                        )}
-                                    </span>
-                                    <span className="flex items-center">
-                                        <Badge variant={STATUS_BADGE_VARIANT[work.status]} className="text-xs truncate">
-                                            {STATUS_LABELS[work.status]}
-                                        </Badge>
-                                    </span>
-                                    <span className="text-sm truncate">
-                                        {work.mangaProgressCurrent
-                                            ? `Ch. ${work.mangaProgressCurrent}`
-                                            : '-'}
-                                    </span>
-                                    <span className={`font-bold text-sm ${getScoreColor(work.score)}`}>
-                                        {work.score !== null ? work.score.toFixed(1) : '-'}
-                                    </span>
-                                </div>
-                            );
-                        })}
+                        <div
+                            style={{
+                                height: `${rowVirtualizer.getTotalSize()}px`,
+                                width: '100%',
+                                position: 'relative',
+                            }}
+                        >
+                            {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+                                const work = filteredAndSortedWorks[virtualRow.index];
+                                return (
+                                    <motion.div
+                                        key={work.id}
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        transition={{ duration: 0.15 }}
+                                        onClick={() => setSelectedWork(work)}
+                                        className="absolute top-0 left-0 w-full grid grid-cols-[50px_1fr_110px_80px_60px] gap-2 px-4 cursor-pointer table-row-premium border-b border-white/5 items-center"
+                                        style={{
+                                            height: `${virtualRow.size}px`,
+                                            transform: `translateY(${virtualRow.start}px)`,
+                                        }}
+                                    >
+                                        <span className="text-sm text-muted-foreground font-mono">
+                                            {work.userIndex}
+                                        </span>
+                                        <span className="flex items-center gap-2 min-w-0">
+                                            <span className="font-medium truncate">{work.title}</span>
+                                            {work.novelProgressRaw && (
+                                                <span className="flex-shrink-0 text-xs px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-500">
+                                                    +N
+                                                </span>
+                                            )}
+                                        </span>
+                                        <span className="flex items-center">
+                                            <Badge variant={STATUS_BADGE_VARIANT[work.status as Status]} className="text-xs truncate">
+                                                {STATUS_LABELS[work.status as Status]}
+                                            </Badge>
+                                        </span>
+                                        <span className="text-sm truncate">
+                                            {work.mangaProgressCurrent
+                                                ? `Ch. ${work.mangaProgressCurrent}`
+                                                : '-'}
+                                        </span>
+                                        <span className={`font-bold text-sm ${getScoreColor(work.score)}`}>
+                                            {work.score !== null ? work.score.toFixed(1) : '-'}
+                                        </span>
+                                    </motion.div>
+                                );
+                            })}
+                        </div>
                     </div>
                 </div>
+            )}
 
-                {filteredAndSortedWorks.length === 0 && (
-                    <div className="p-12 text-center text-muted-foreground">
-                        <p className="text-lg font-medium mb-1">No works found</p>
-                        <p className="text-sm">Try adjusting your search or filters.</p>
+            {/* Empty state */}
+            {filteredAndSortedWorks.length === 0 && (
+                <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={springs.gentle}
+                    className="glass-card rounded-2xl p-12 text-center"
+                >
+                    <div className="flex h-16 w-16 mx-auto items-center justify-center rounded-full bg-muted/50 mb-4">
+                        <Search className="h-8 w-8 text-muted-foreground" />
                     </div>
-                )}
-            </div>
+                    <p className="text-lg text-display font-medium mb-1">No works found</p>
+                    <p className="text-sm text-muted-foreground">Try adjusting your search or filters.</p>
+                </motion.div>
+            )}
 
             {/* Detail Panel */}
             {selectedWork && (
