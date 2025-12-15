@@ -74,14 +74,20 @@ Non-admin users can explore the app with limited access:
 ## Demo
 
 ### Light Mode
-<img width="1440" height="787" alt="Screenshot 2025-12-14 at 23 42 59" src="https://github.com/user-attachments/assets/56b65474-a4d6-4337-811b-ad6d458a556b" />
-<img width="513" height="592" alt="Screenshot 2025-12-14 at 23 43 50" src="https://github.com/user-attachments/assets/559a4085-1e10-4ab7-9413-753113e4b48d" />
-
+<img width="576" height="796" alt="Screenshot 2025-12-15 at 19 08 09" src="https://github.com/user-attachments/assets/79588bef-3c7c-495a-be5e-181cbdb43242" />
+<img width="1440" height="827" alt="Screenshot 2025-12-15 at 19 08 46" src="https://github.com/user-attachments/assets/50622674-cd8f-468b-92ab-1a15eb07925a" />
 ### Dark Mode
-<img width="1440" height="784" alt="Screenshot 2025-12-14 at 23 44 08" src="https://github.com/user-attachments/assets/356aced8-037f-4b9c-8152-9522c836cf26" />
+
+<img width="576" height="796" alt="Screenshot 2025-12-15 at 19 07 55" src="https://github.com/user-attachments/assets/b5014ceb-d9af-45de-9307-c81b166f3287" />
+<img width="1440" height="824" alt="Screenshot 2025-12-15 at 19 08 56" src="https://github.com/user-attachments/assets/4f643f80-f2da-480a-8e91-bf96bdd679fd" />
 
 
-https://github.com/user-attachments/assets/d54fcded-a1fc-4a83-9b57-cd0637ef850e
+https://github.com/user-attachments/assets/d81ac733-4d15-40cf-bfa1-cf4231912bb1
+
+
+
+https://github.com/user-attachments/assets/d2b2c662-71eb-4f86-b55d-dc581c3ae5ea
+
 
 ---
 
