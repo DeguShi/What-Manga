@@ -16,12 +16,14 @@ import {
     Plus,
     Settings,
     Trash2,
+    LogOut,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { WorkList } from '@/components/work-list';
 import { ThemeToggleButton } from '@/components/theme-toggle';
 import { CreateEntryModal } from '@/components/create-entry-modal';
 import { ClearAllDialog } from '@/components/clear-all-dialog';
+import { signOut } from 'next-auth/react';
 import type { Work } from '@prisma/client';
 
 interface HomeClientProps {
@@ -76,45 +78,45 @@ export function HomeClient({ works: initialWorks }: HomeClientProps) {
         <div className="min-h-screen mesh-gradient">
             {/* Premium Header */}
             <header className="sticky top-0 z-40 glass border-b border-white/10">
-                <div className="container mx-auto flex h-16 items-center justify-between px-4">
-                    <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl gradient-primary shadow-lg glow-sm">
-                            <BookOpen className="h-5 w-5 text-white" />
+                <div className="container mx-auto flex h-14 sm:h-16 items-center justify-between px-3 sm:px-4">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                        <div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-xl gradient-primary shadow-lg glow-sm">
+                            <BookOpen className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                         </div>
                         <div>
-                            <h1 className="text-xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
+                            <h1 className="text-lg sm:text-xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
                                 What-Manga
                             </h1>
                             <p className="text-xs text-muted-foreground hidden sm:block">Tracker</p>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1 sm:gap-2">
                         <ThemeToggleButton />
 
                         {/* + New Button */}
                         <Button
                             size="sm"
-                            className="gradient-primary text-white shadow-md hover:shadow-lg transition-shadow"
+                            className="gradient-primary text-white shadow-md hover:shadow-lg transition-shadow h-8 sm:h-9 px-2 sm:px-3"
                             onClick={() => setShowCreateModal(true)}
                         >
-                            <Plus className="mr-1 h-4 w-4" />
-                            New
+                            <Plus className="h-4 w-4" />
+                            <span className="hidden sm:inline ml-1">New</span>
                         </Button>
 
-                        <Button variant="outline" size="sm" className="glass-button" asChild>
+                        <Button variant="outline" size="sm" className="glass-button h-8 sm:h-9 px-2 sm:px-3" asChild>
                             <Link href="/import">
-                                <Upload className="mr-2 h-4 w-4" />
-                                Import
+                                <Upload className="h-4 w-4" />
+                                <span className="hidden sm:inline ml-2">Import</span>
                             </Link>
                         </Button>
 
                         {/* Export Dropdown */}
                         <div className="relative group">
-                            <Button variant="outline" size="sm" className="glass-button">
-                                <Download className="mr-2 h-4 w-4" />
-                                Export
-                                <ChevronDown className="ml-2 h-3 w-3" />
+                            <Button variant="outline" size="sm" className="glass-button h-8 sm:h-9 px-2 sm:px-3">
+                                <Download className="h-4 w-4" />
+                                <span className="hidden sm:inline ml-2">Export</span>
+                                <ChevronDown className="ml-1 h-3 w-3" />
                             </Button>
                             <div className="absolute right-0 mt-2 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                                 <div className="glass-card rounded-lg p-1 shadow-xl">
@@ -149,6 +151,14 @@ export function HomeClient({ works: initialWorks }: HomeClientProps) {
                                     >
                                         <Trash2 className="h-4 w-4" />
                                         Clear All Entries
+                                    </button>
+                                    <hr className="my-1 border-white/10" />
+                                    <button
+                                        onClick={() => signOut({ callbackUrl: '/auth/signin' })}
+                                        className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-muted transition-colors"
+                                    >
+                                        <LogOut className="h-4 w-4" />
+                                        Sign Out
                                     </button>
                                 </div>
                             </div>
