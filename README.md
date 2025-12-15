@@ -1,69 +1,299 @@
-# What-Manga Tracker
+<div align="center">
 
-A modern, local-first manga and light novel tracking web application.
+# 📚 What-Manga
+
+**A modern manga & light novel tracker built with Next.js 14**
+
+[![Next.js](https://img.shields.io/badge/Next.js-14-black?logo=next.js)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?logo=typescript)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-38bdf8?logo=tailwindcss)](https://tailwindcss.com/)
+[![Prisma](https://img.shields.io/badge/Prisma-5.0-2D3748?logo=prisma)](https://www.prisma.io/)
+
+[Features](#features) • [Demo](#demo) • [Getting Started](#getting-started) • [Architecture](#architecture) • [API](#api-reference) • [Deploy](#deployment)
+
+</div>
+
+---
+
+## Overview
+
+What-Manga is a personal manga and light novel tracking application designed to manage large collections (900+ entries). It features a custom text parser for bulk imports, real-time filtering, and a premium glassmorphism UI with dark mode support.
+
+Built as a full-stack Next.js application with Google OAuth authentication and PostgreSQL database.
 
 ## Features
 
-- **Import** - Parse `.txt` files in custom format with 900+ entries
-- **List View** - Fast search, filter by status, sort by any column
-- **Quick Edit** - +1/-1 buttons for progress, score slider, status toggle
-- **Novel Tracking** - Separate progress for manga and light novel
-- **Private Notes** - Review notes hidden by default in list view
-- **CSV Export** - Download your full list as spreadsheet
+### 📥 Smart Import System
+- Parse custom `.txt` format with 900+ entries
+- Auto-detect CSV format for spreadsheet imports
+- Preview and validate before committing
+- Three import modes: Add, Update, Replace
 
-## Quick Start
+### 📊 Collection Management
+- Real-time search across all entries
+- Filter by status (Reading, Completed, Dropped)
+- Sort by title, score, or custom index
+- Virtual scrolling for large lists (1000+ items)
+
+### ✏️ Quick Edit Panel
+- +1/-1 buttons for chapter/volume progress
+- Score slider (0-10 with decimals)
+- Status toggle with visual badges
+- Private review notes
+
+### 🎨 Premium UI
+- Glassmorphism design with backdrop blur
+- Dark/Light/System theme modes
+- Responsive layout (mobile-first)
+- Smooth animations and transitions
+
+### 🔐 Authentication
+- Google OAuth via NextAuth.js v5
+- JWT sessions for Edge compatibility
+- Admin role system via environment config
+- Protected routes with middleware
+
+### 📤 Export Options
+- CSV spreadsheet format
+- MyAnimeList XML format (MAL-compatible)
+
+---
+
+## Demo
+
+### Light Mode
+```
+┌─────────────────────────────────────────────────────────┐
+│  📚 What-Manga                    🌙  + New  ⬇️  ⚙️    │
+├─────────────────────────────────────────────────────────┤
+│  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐       │
+│  │  Total  │ │Complete │ │ Reading │ │ Dropped │       │
+│  │   921   │ │   450   │ │   380   │ │    91   │       │
+│  └─────────┘ └─────────┘ └─────────┘ └─────────┘       │
+├─────────────────────────────────────────────────────────┤
+│  🔍 Search...    [Status ▼]    [Sort ▼]                │
+├─────────────────────────────────────────────────────────┤
+│  #   Title                     Status      Score  Ch   │
+│  1   Naruto                    ✅ Complete  10.0  72   │
+│  2   One Piece                 📖 Reading   9.0   1089 │
+│  3   Attack on Titan           ✅ Complete  9.9   139  │
+└─────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Architecture
+
+### System Overview
+
+```mermaid
+flowchart TB
+    subgraph Client["Client (Browser)"]
+        UI[React Components]
+        Theme[Theme Provider]
+        Session[Session Provider]
+    end
+    
+    subgraph NextJS["Next.js 14 App Router"]
+        Pages[Server Components]
+        API[API Routes]
+        MW[Middleware]
+    end
+    
+    subgraph External["External Services"]
+        Google[Google OAuth]
+        Neon[(Neon PostgreSQL)]
+    end
+    
+    UI --> Pages
+    UI --> API
+    MW --> Pages
+    MW --> API
+    Pages --> Neon
+    API --> Neon
+    Session --> Google
+    MW -.-> Session
+```
+
+### Authentication Flow
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant M as Middleware
+    participant P as Page
+    participant A as NextAuth
+    participant G as Google
+    participant DB as Database
+
+    U->>M: GET /
+    M->>M: Check JWT
+    alt No Session
+        M-->>U: Redirect /auth/signin
+        U->>A: Click "Sign in with Google"
+        A->>G: OAuth Request
+        G-->>A: Auth Code
+        A->>DB: Create/Update User
+        A-->>U: Set JWT Cookie
+        U->>M: GET /
+    end
+    M->>P: Allow Request
+    P->>DB: Fetch Works
+    P-->>U: Render Page
+```
+
+### Data Model
+
+```mermaid
+erDiagram
+    User ||--o{ Account : has
+    User ||--o{ Session : has
+    User ||--o{ Work : owns
+
+    User {
+        string id PK
+        string email UK
+        string name
+        string image
+    }
+
+    Work {
+        string id PK
+        string title
+        int userIndex
+        string status
+        float score
+        float mangaProgressCurrent
+        string mangaProgressUnit
+        float novelProgressCurrent
+        string reviewNote
+        string userId FK
+    }
+
+    Account {
+        string id PK
+        string provider
+        string providerAccountId
+        string userId FK
+    }
+```
+
+---
+
+## Getting Started
 
 ### Prerequisites
 
-- Node.js 18+ (LTS recommended)
-- pnpm
+- Node.js 18+ 
+- npm or pnpm
+- PostgreSQL database (local or [Neon](https://neon.tech))
+- Google OAuth credentials ([Console](https://console.cloud.google.com))
+
+### Environment Setup
+
+Create `.env` file:
+
+```bash
+# Database
+DATABASE_URL="postgresql://user:pass@host/db?sslmode=require"
+
+# NextAuth
+AUTH_SECRET="openssl rand -base64 32"
+
+# Google OAuth
+GOOGLE_CLIENT_ID="xxx.apps.googleusercontent.com"
+GOOGLE_CLIENT_SECRET="GOCSPX-xxx"
+
+# Admin emails (comma-separated)
+ADMIN_EMAILS="you@gmail.com"
+```
 
 ### Installation
 
 ```bash
+# Clone repository
+git clone https://github.com/DeguShi/What-Manga.git
+cd What-Manga
+
 # Install dependencies
-pnpm install
+npm install
 
-# Generate Prisma client and create database
-pnpm db:generate
-pnpm db:push
+# Setup database
+npx prisma generate
+npx prisma db push
 
-# Start development server
-pnpm dev
+# Run development server
+npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open [http://localhost:3000](http://localhost:3000)
 
-### Import Your List
+---
 
-1. Navigate to `/import`
-2. Drag and drop your `.txt` file
-3. Preview parsed entries
-4. Choose import mode (Add/Update/Replace)
-5. Click "Import"
+## Project Structure
 
-## Commands
+```
+What-Manga/
+├── src/
+│   ├── app/                    # Next.js App Router
+│   │   ├── api/               # API routes
+│   │   │   ├── auth/          # NextAuth handlers
+│   │   │   ├── works/         # CRUD endpoints
+│   │   │   ├── import/        # Import endpoints
+│   │   │   └── export/        # CSV/MAL export
+│   │   ├── auth/              # Auth pages
+│   │   └── page.tsx           # Home page
+│   ├── components/            # React components
+│   │   ├── ui/               # shadcn/ui primitives
+│   │   ├── home-client.tsx   # Main dashboard
+│   │   ├── work-list.tsx     # Virtual list
+│   │   └── work-detail-panel.tsx
+│   └── lib/                   # Utilities
+│       ├── auth.ts           # NextAuth config
+│       ├── auth.config.ts    # Edge-compatible config
+│       ├── parser/           # TXT parser
+│       └── db.ts             # Prisma client
+├── prisma/
+│   └── schema.prisma         # Database schema
+├── middleware.ts              # Auth middleware
+└── package.json
+```
 
-| Command | Description |
-|---------|-------------|
-| `pnpm dev` | Start development server |
-| `pnpm build` | Build for production |
-| `pnpm lint` | Run ESLint |
-| `pnpm test` | Run parser unit tests |
-| `pnpm db:studio` | Open Prisma Studio |
+---
 
-## Tech Stack
+## API Reference
 
-- **Framework**: Next.js 14 (App Router)
-- **Language**: TypeScript (strict)
-- **Styling**: Tailwind CSS
-- **Components**: shadcn/ui + Radix UI
-- **ORM**: Prisma with SQLite
-- **Testing**: Vitest
+### Works
 
-## TXT Format
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/works` | List works (paginated) |
+| `POST` | `/api/works` | Create single work |
+| `GET` | `/api/works/[id]` | Get work by ID |
+| `PATCH` | `/api/works/[id]` | Update work |
+| `DELETE` | `/api/works/[id]` | Delete work |
+| `DELETE` | `/api/works/all` | Clear all works |
 
-The parser supports this format:
+### Import/Export
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/import` | Parse TXT/CSV file |
+| `POST` | `/api/import/commit` | Commit parsed entries |
+| `GET` | `/api/export/csv` | Download CSV |
+| `GET` | `/api/export/mal` | Download MAL XML |
+
+### Query Parameters
+
+```
+GET /api/works?search=naruto&status=COMPLETED&sortBy=score&sortOrder=desc&limit=50
+```
+
+---
+
+## Import Format
+
+### TXT Format (Custom)
 
 ```
 1- Naruto 
@@ -71,34 +301,95 @@ The parser supports this format:
 {10}
 
 2- One Piece 
-(~922º? chap. do mangá).
+(~1089º chap. do mangá).
 {9.0}
+
+3- Attack on Titan
+(∆139º chap. do mangá).
+{9.9}
 ```
 
-**Status symbols:**
-- `~` In progress
-- `*` Completed
-- `∆` Incomplete
-- `?` Uncertain
-- `r.π` Dropped/Hiatus
+**Status Symbols:**
+| Symbol | Status |
+|--------|--------|
+| `*` | Completed |
+| `~` | In Progress |
+| `∆` | Incomplete |
+| `?` | Uncertain |
+| `r.π` | Dropped/Hiatus |
 
-**Score:** `{0..10}` decimal
+### CSV Format
+
+```csv
+Index,Title,Status,Score,MangaProgress,NovelProgress,Notes
+1,Naruto,COMPLETED,10,72 vol.,,-
+2,One Piece,IN_PROGRESS,9.0,1089 ch.,,-
+```
+
+---
 
 ## Deployment
 
-### Vercel + Neon Postgres
+### Vercel + Neon
 
-1. Create a Neon database
-2. Update `prisma/schema.prisma`:
-   ```prisma
-   datasource db {
-     provider = "postgresql"
-     url      = env("DATABASE_URL")
-   }
+1. **Create Neon Database**
+   - Sign up at [neon.tech](https://neon.tech)
+   - Create project, copy connection string
+
+2. **Deploy to Vercel**
+   ```bash
+   vercel
    ```
-3. Set `DATABASE_URL` in Vercel environment
-4. Deploy via `vercel` CLI or GitHub integration
+
+3. **Set Environment Variables**
+   - Add all `.env` variables in Vercel dashboard
+   - Add `NEXTAUTH_URL` with your production URL
+
+4. **Configure Google OAuth**
+   - Add production URL to authorized redirects
+   - `https://your-app.vercel.app/api/auth/callback/google`
+
+---
+
+## Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start dev server |
+| `npm run build` | Production build |
+| `npm run start` | Start production server |
+| `npm run lint` | Run ESLint |
+| `npm run test` | Run Vitest tests |
+| `npx prisma studio` | Open database GUI |
+
+---
+
+## Tech Stack
+
+| Category | Technology |
+|----------|------------|
+| Framework | Next.js 14 (App Router) |
+| Language | TypeScript 5 |
+| Styling | Tailwind CSS 3.4 |
+| Components | shadcn/ui + Radix UI |
+| Database | PostgreSQL (Neon) |
+| ORM | Prisma 5 |
+| Auth | NextAuth.js v5 |
+| Testing | Vitest |
+| Deployment | Vercel |
+
+---
+
+## Contributing
+
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/amazing`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing`)
+5. Open a Pull Request
+
+---
 
 ## License
 
-MIT
+MIT © [DeguShi](https://github.com/DeguShi)
