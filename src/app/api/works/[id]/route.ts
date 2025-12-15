@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { auth } from '@/lib/auth';
+import { isAdmin } from '@/lib/admin-emails';
 import { z } from 'zod';
 
 interface RouteParams {
@@ -11,8 +12,13 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     try {
         // Auth check
         const session = await auth();
-        if (!session?.user?.id) {
+        if (!session?.user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        // Only admins can get individual work details
+        if (!isAdmin(session.user.email)) {
+            return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 });
         }
 
         const { id } = await params;
@@ -27,9 +33,9 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
             );
         }
 
-        // Verify user owns this work
+        // Verify admin owns this work
         if (work.userId !== session.user.id) {
-            return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+            return NextResponse.json({ error: 'Forbidden - Not your work' }, { status: 403 });
         }
 
         return NextResponse.json(work);
@@ -62,19 +68,24 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     try {
         // Auth check
         const session = await auth();
-        if (!session?.user?.id) {
+        if (!session?.user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        // Admin check
+        if (!isAdmin(session.user.email)) {
+            return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 });
         }
 
         const { id } = await params;
 
-        // Verify user owns this work
+        // Verify work exists and belongs to this admin
         const existingWork = await prisma.work.findUnique({ where: { id } });
         if (!existingWork) {
             return NextResponse.json({ error: 'Work not found' }, { status: 404 });
         }
         if (existingWork.userId !== session.user.id) {
-            return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+            return NextResponse.json({ error: 'Forbidden - Not your work' }, { status: 403 });
         }
 
         const body = await request.json();
@@ -105,19 +116,24 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     try {
         // Auth check
         const session = await auth();
-        if (!session?.user?.id) {
+        if (!session?.user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        // Admin check
+        if (!isAdmin(session.user.email)) {
+            return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 });
         }
 
         const { id } = await params;
 
-        // Verify user owns this work
+        // Verify work exists and belongs to this admin
         const existingWork = await prisma.work.findUnique({ where: { id } });
         if (!existingWork) {
             return NextResponse.json({ error: 'Work not found' }, { status: 404 });
         }
         if (existingWork.userId !== session.user.id) {
-            return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+            return NextResponse.json({ error: 'Forbidden - Not your work' }, { status: 403 });
         }
 
         await prisma.work.delete({

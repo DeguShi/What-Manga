@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { auth } from '@/lib/auth';
+import { isAdmin } from '@/lib/admin-emails';
 import { z } from 'zod';
 
 // Query params schema
@@ -17,11 +18,20 @@ const querySchema = z.object({
 
 export async function GET(request: NextRequest) {
     try {
-        // Auth check
+        // Auth check - must be authenticated
         const session = await auth();
-        if (!session?.user?.id) {
+        if (!session?.user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
+
+        // Non-admins get empty data (demo is handled by page.tsx)
+        if (!isAdmin(session.user.email) || !session.user.id) {
+            return NextResponse.json({
+                data: [],
+                pagination: { page: 1, limit: 50, total: 0, totalPages: 0 },
+            });
+        }
+
         const userId = session.user.id;
 
         const { searchParams } = new URL(request.url);
@@ -40,7 +50,7 @@ export async function GET(request: NextRequest) {
         const limit = params.limit || 50;
         const skip = (page - 1) * limit;
 
-        // Build where clause - ALWAYS filter by userId
+        // Build where clause - filter by userId (per-user data)
         const where: Record<string, unknown> = { userId };
 
         if (params.search) {
@@ -105,24 +115,33 @@ const createSchema = z.object({
     title: z.string().min(1),
     userIndex: z.number().int(),
     status: z.enum(['IN_PROGRESS', 'COMPLETED', 'INCOMPLETE', 'UNCERTAIN', 'DROPPED_HIATUS']).optional(),
-    mangaProgressRaw: z.string().optional(),
-    mangaProgressCurrent: z.number().optional(),
-    mangaProgressUnit: z.string().optional(),
-    novelProgressRaw: z.string().optional(),
-    novelProgressCurrent: z.number().optional(),
-    novelProgressUnit: z.string().optional(),
-    novelExtra: z.string().optional(),
-    score: z.number().min(0).max(10).optional(),
-    reviewNote: z.string().optional(),
-    rawImportedText: z.string().optional(),
+    mangaProgressRaw: z.string().optional().nullable(),
+    mangaProgressCurrent: z.number().optional().nullable(),
+    mangaProgressUnit: z.string().optional().nullable(),
+    novelProgressRaw: z.string().optional().nullable(),
+    novelProgressCurrent: z.number().optional().nullable(),
+    novelProgressUnit: z.string().optional().nullable(),
+    novelExtra: z.string().optional().nullable(),
+    score: z.number().min(0).max(10).optional().nullable(),
+    reviewNote: z.string().optional().nullable(),
+    rawImportedText: z.string().optional().nullable(),
 });
 
 export async function POST(request: NextRequest) {
     try {
         // Auth check
         const session = await auth();
-        if (!session?.user?.id) {
+        if (!session?.user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        // Admin check - only admins can create
+        if (!isAdmin(session.user.email)) {
+            return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 });
+        }
+
+        if (!session.user.id) {
+            return NextResponse.json({ error: 'User ID not found' }, { status: 400 });
         }
 
         const body = await request.json();
@@ -131,7 +150,7 @@ export async function POST(request: NextRequest) {
         const work = await prisma.work.create({
             data: {
                 ...data,
-                userId: session.user.id, // Associate with current user
+                userId: session.user.id, // Associate with admin's userId
             },
         });
 
