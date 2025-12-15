@@ -2,7 +2,7 @@
 
 # 📚 What-Manga
 
-**A modern manga & light novel tracker built with Next.js 14**
+**A manga & light novel tracker built with Next.js 14**
 
 [![Next.js](https://img.shields.io/badge/Next.js-14-black?logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?logo=typescript)](https://www.typescriptlang.org/)
@@ -17,14 +17,14 @@
 
 ## Overview
 
-What-Manga is a personal manga and light novel tracking application designed to manage large collections (900+ entries). It features a custom text parser for bulk imports, real-time filtering, and a premium glassmorphism UI with dark mode support.
+What-Manga is a personal manga and light novel tracking application. It features a custom text parser for bulk imports, real-time filtering, and a glassmorphism UI with dark mode support.
 
 Built as a full-stack Next.js application with Google OAuth authentication and PostgreSQL database.
 
 ## Features
 
 ### 📥 Smart Import System
-- Parse custom `.txt` format with 900+ entries
+- Parse custom `.txt` format
 - Auto-detect CSV format for spreadsheet imports
 - Preview and validate before committing
 - Three import modes: Add, Update, Replace
@@ -41,7 +41,7 @@ Built as a full-stack Next.js application with Google OAuth authentication and P
 - Status toggle with visual badges
 - Private review notes
 
-### 🎨 Premium UI
+### 🎨 UI
 - Glassmorphism design with backdrop blur
 - Dark/Light/System theme modes
 - Responsive layout (mobile-first)
@@ -62,23 +62,14 @@ Built as a full-stack Next.js application with Google OAuth authentication and P
 ## Demo
 
 ### Light Mode
-```
-┌─────────────────────────────────────────────────────────┐
-│  📚 What-Manga                    🌙  + New  ⬇️  ⚙️    │
-├─────────────────────────────────────────────────────────┤
-│  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐       │
-│  │  Total  │ │Complete │ │ Reading │ │ Dropped │       │
-│  │   921   │ │   450   │ │   380   │ │    91   │       │
-│  └─────────┘ └─────────┘ └─────────┘ └─────────┘       │
-├─────────────────────────────────────────────────────────┤
-│  🔍 Search...    [Status ▼]    [Sort ▼]                │
-├─────────────────────────────────────────────────────────┤
-│  #   Title                     Status      Score  Ch   │
-│  1   Naruto                    ✅ Complete  10.0  72   │
-│  2   One Piece                 📖 Reading   9.0   1089 │
-│  3   Attack on Titan           ✅ Complete  9.9   139  │
-└─────────────────────────────────────────────────────────┘
-```
+<img width="1440" height="787" alt="Screenshot 2025-12-14 at 23 42 59" src="https://github.com/user-attachments/assets/56b65474-a4d6-4337-811b-ad6d458a556b" />
+<img width="513" height="592" alt="Screenshot 2025-12-14 at 23 43 50" src="https://github.com/user-attachments/assets/559a4085-1e10-4ab7-9413-753113e4b48d" />
+
+### Dark Mode
+<img width="1440" height="784" alt="Screenshot 2025-12-14 at 23 44 08" src="https://github.com/user-attachments/assets/356aced8-037f-4b9c-8152-9522c836cf26" />
+
+
+https://github.com/user-attachments/assets/d54fcded-a1fc-4a83-9b57-cd0637ef850e
 
 ---
 
