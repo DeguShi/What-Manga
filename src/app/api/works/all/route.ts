@@ -13,11 +13,20 @@ export async function DELETE(request: Request) {
             );
         }
 
-        const result = await prisma.work.deleteMany();
+        // Keep deleting until all works are gone (handles batch limits)
+        let totalDeleted = 0;
+        let batchDeleted = 0;
+
+        do {
+            const result = await prisma.work.deleteMany();
+            batchDeleted = result.count;
+            totalDeleted += batchDeleted;
+            console.log(`[Clear All] Deleted batch: ${batchDeleted}, total: ${totalDeleted}`);
+        } while (batchDeleted > 0);
 
         return NextResponse.json({
             success: true,
-            deleted: result.count,
+            deleted: totalDeleted,
         });
     } catch (error) {
         console.error('Error deleting all works:', error);

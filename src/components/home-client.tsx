@@ -72,6 +72,12 @@ export function HomeClient({ works: initialWorks }: HomeClientProps) {
     const handleCleared = () => {
         setWorks([]);
         router.refresh();
+        // Force refetch to ensure we don't show stale data
+        setTimeout(() => {
+            fetch('/api/works?limit=10000')
+                .then(res => res.json())
+                .then(data => setWorks(data.data || []));
+        }, 100);
     };
 
     return (
