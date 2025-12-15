@@ -50,6 +50,11 @@ export function WorkList({ initialWorks, initialFilter = 'all', onFilterChange }
 
     const parentRef = useRef<HTMLDivElement>(null);
 
+    // Sync works when initialWorks prop changes (e.g., after import)
+    useEffect(() => {
+        setWorks(initialWorks);
+    }, [initialWorks]);
+
     // Sync external filter changes
     useEffect(() => {
         setStatusFilter(initialFilter);

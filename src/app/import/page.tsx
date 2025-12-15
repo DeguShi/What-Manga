@@ -54,10 +54,10 @@ export default function ImportPage() {
     const [importMode, setImportMode] = useState<ImportMode>('add');
 
     const handleFile = useCallback(async (file: File) => {
-        if (!file.name.endsWith('.txt')) {
+        if (!file.name.endsWith('.txt') && !file.name.endsWith('.csv')) {
             toast({
                 title: 'Invalid file type',
-                description: 'Please upload a .txt file',
+                description: 'Please upload a .txt or .csv file',
                 variant: 'destructive',
             });
             return;
@@ -185,8 +185,8 @@ export default function ImportPage() {
                             onDragOver={handleDragOver}
                             onDragLeave={handleDragLeave}
                             className={`relative flex min-h-[300px] cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed bg-muted/40 transition-colors ${isDragging
-                                    ? 'border-primary bg-primary/5'
-                                    : 'border-muted-foreground/25 hover:border-primary/50'
+                                ? 'border-primary bg-primary/5'
+                                : 'border-muted-foreground/25 hover:border-primary/50'
                                 }`}
                         >
                             {isUploading ? (
@@ -198,13 +198,13 @@ export default function ImportPage() {
                                         Drop your manga list here
                                     </p>
                                     <p className="text-sm text-muted-foreground">
-                                        or click to browse
+                                        Supports .txt and .csv files
                                     </p>
                                 </>
                             )}
                             <input
                                 type="file"
-                                accept=".txt"
+                                accept=".txt,.csv"
                                 onChange={handleFileInput}
                                 className="absolute inset-0 cursor-pointer opacity-0"
                                 disabled={isUploading}

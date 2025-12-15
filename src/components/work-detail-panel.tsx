@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     X,
     Plus,
@@ -83,6 +83,18 @@ export function WorkDetailPanel({
         score: work.score ?? 0,
         reviewNote: work.reviewNote ?? '',
     });
+
+    // Sync form data when work prop changes (fixes stale data issue)
+    useEffect(() => {
+        setFormData({
+            status: work.status,
+            mangaProgressCurrent: work.mangaProgressCurrent ?? 0,
+            novelProgressCurrent: work.novelProgressCurrent ?? 0,
+            score: work.score ?? 0,
+            reviewNote: work.reviewNote ?? '',
+        });
+        setIsEditing(false);
+    }, [work]);
 
     const handleSave = async () => {
         setIsLoading(true);

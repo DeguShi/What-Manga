@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -34,6 +34,11 @@ export function HomeClient({ works: initialWorks }: HomeClientProps) {
     const [filter, setFilter] = useState('all');
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showClearDialog, setShowClearDialog] = useState(false);
+
+    // Sync works when prop changes (e.g., after navigation from import)
+    useEffect(() => {
+        setWorks(initialWorks);
+    }, [initialWorks]);
 
     // Calculate stats from actual works data
     const stats = useMemo(() => {
