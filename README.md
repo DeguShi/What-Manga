@@ -33,7 +33,7 @@ Built as a full-stack Next.js application with Google OAuth authentication and P
 - Real-time search across all entries
 - Filter by status (Reading, Completed, Dropped)
 - Sort by title, score, or custom index
-- Virtual scrolling for large lists (1000+ items)
+- Virtual scrolling for large lists
 
 ### ✏️ Quick Edit Panel
 - +1/-1 buttons for chapter/volume progress
@@ -42,10 +42,16 @@ Built as a full-stack Next.js application with Google OAuth authentication and P
 - Private review notes
 
 ### 🎨 UI
-- Glassmorphism design with backdrop blur
+- Wine-red accents and warm paper tones
+- Custom typography (Space Grotesk + Inter)
+- Mobile-first card layout with manga-style left border accents
 - Dark/Light/System theme modes
-- Responsive layout (mobile-first)
-- Smooth animations and transitions
+- Smooth Framer Motion animations with spring physics
+
+### ⌨️ Keyboard Shortcuts
+- `/` — Focus search input
+- `Escape` — Close modals
+- `n` — Create new entry
 
 ### 🔐 Authentication
 - Google OAuth via NextAuth.js v5
@@ -62,7 +68,6 @@ Non-admin users can explore the app with limited access:
 
 ### 📤 Export Options
 - CSV spreadsheet format
-- MyAnimeList XML format (MAL-compatible)
 
 ---
 
@@ -238,17 +243,24 @@ What-Manga/
 │   │   │   ├── auth/          # NextAuth handlers
 │   │   │   ├── works/         # CRUD endpoints
 │   │   │   ├── import/        # Import endpoints
-│   │   │   └── export/        # CSV/MAL export
+│   │   │   └── export/        # CSV export
 │   │   ├── auth/              # Auth pages
 │   │   └── page.tsx           # Home page
 │   ├── components/            # React components
 │   │   ├── ui/               # shadcn/ui primitives
 │   │   ├── home-client.tsx   # Main dashboard
 │   │   ├── work-list.tsx     # Virtual list
-│   │   └── work-detail-panel.tsx
+│   │   ├── work-card.tsx     # Mobile card component
+│   │   ├── work-detail-panel.tsx
+│   │   └── query-provider.tsx # React Query provider
+│   ├── hooks/                 # Custom hooks
+│   │   ├── use-works.ts      # Data fetching (React Query)
+│   │   └── use-keyboard-shortcuts.ts
 │   └── lib/                   # Utilities
 │       ├── auth.ts           # NextAuth config
 │       ├── auth.config.ts    # Edge-compatible config
+│       ├── constants.ts      # Status options & colors
+│       ├── motion.ts         # Animation presets
 │       ├── parser/           # TXT parser
 │       └── db.ts             # Prisma client
 ├── prisma/
@@ -370,6 +382,9 @@ Index,Title,Status,Score,MangaProgress,NovelProgress,Notes
 | Language | TypeScript 5 |
 | Styling | Tailwind CSS 3.4 |
 | Components | shadcn/ui + Radix UI |
+| Animation | Framer Motion |
+| Data Fetching | React Query (@tanstack/react-query) |
+| Virtual Scroll | @tanstack/react-virtual |
 | Database | PostgreSQL (Neon) |
 | ORM | Prisma 5 |
 | Auth | NextAuth.js v5 |
