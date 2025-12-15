@@ -21,7 +21,7 @@ What-Manga is a personal manga and light novel tracking application. It features
 
 Built as a full-stack Next.js application with Google OAuth authentication and PostgreSQL database.
 
-> **Why I built this:** I've always kept list-like tracking of all anime I've watched, books I've read, and manga I've read. Ideally, I would save my list somewhere like MyAnimeList or Anime-Planet. However, my list is just too big, so it was not realistic. Therefore, I decided to make this app :)
+> **Why I built this:** I've always kept list-like tracking of all anime I've watched, books I've read, and manga I've read. Ideally, I would save my list somewhere like MyAnimeList or Anime-Planet. However, my list is just too big, so it was not realistic to manually add it there. Therefore, I decided to make this app :)
 
 ## Features
 
