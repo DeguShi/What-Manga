@@ -21,7 +21,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import {
     Dialog,
-    DialogContent,
+    AnimatedDialogContent,
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
@@ -157,7 +157,11 @@ export function WorkDetailPanel({
 
     return (
         <Dialog open={open} onOpenChange={() => onClose()}>
-            <DialogContent className="w-[calc(100vw-2rem)] sm:max-w-lg max-h-[85vh] overflow-y-auto glass-card border-white/20 dark:border-white/10 animate-scale-in">
+            <AnimatedDialogContent
+                open={open}
+                mobileSheet
+                className="w-[calc(100vw-2rem)] sm:max-w-lg max-h-[85vh] overflow-y-auto glass-card border-white/20 dark:border-white/10"
+            >
                 <DialogHeader className="pb-4 border-b border-white/10">
                     <div className="flex items-center justify-between">
                         <DialogTitle className="flex items-center gap-2 text-lg">
@@ -460,7 +464,7 @@ export function WorkDetailPanel({
                         </Button>
                     )}
                 </div>
-            </DialogContent>
+            </AnimatedDialogContent>
         </Dialog>
     );
 }

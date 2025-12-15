@@ -24,6 +24,24 @@
     --input: 220 13% 91%;
     --ring: 262 83% 58%;
     --radius: 0.625rem;
+
+    /* Spacing tokens */
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-5: 1.25rem;
+    --space-6: 1.5rem;
+    --space-8: 2rem;
+    --space-10: 2.5rem;
+    --space-12: 3rem;
+
+    /* Shadow tokens */
+    --shadow-color: 220 13% 10%;
+    --shadow-sm: 0 1px 2px hsl(var(--shadow-color) / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(var(--shadow-color) / 0.1);
+    --shadow-lg: 0 10px 15px -3px hsl(var(--shadow-color) / 0.1);
+    --shadow-xl: 0 20px 25px -5px hsl(var(--shadow-color) / 0.15);
   }
 
   .dark {
@@ -46,6 +64,13 @@
     --border: 216 34% 17%;
     --input: 216 34% 17%;
     --ring: 263 70% 60%;
+
+    /* Dark mode shadow tokens */
+    --shadow-color: 0 0% 0%;
+    --shadow-sm: 0 1px 2px hsl(var(--shadow-color) / 0.2);
+    --shadow-md: 0 4px 6px -1px hsl(var(--shadow-color) / 0.3);
+    --shadow-lg: 0 10px 15px -3px hsl(var(--shadow-color) / 0.4);
+    --shadow-xl: 0 20px 25px -5px hsl(var(--shadow-color) / 0.5);
   }
 }
 
@@ -188,6 +213,20 @@
     }
   }
 
+  @keyframes shimmer {
+    0% {
+      background-position: -400% 0;
+    }
+
+    100% {
+      background-position: 400% 0;
+    }
+  }
+
+  .animate-shimmer {
+    animation: shimmer 2s ease-in-out infinite;
+  }
+
   /* Glow effects */
   .glow-primary {
     box-shadow: 0 0 20px -5px hsl(var(--primary) / 0.5);
@@ -230,4 +269,36 @@
 
 .table-row-premium:hover {
   @apply bg-slate-100/80 dark:bg-white/5;
+}
+
+.table-row-premium:active {
+  @apply bg-slate-200/80 dark:bg-white/10 scale-[0.995];
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Safe animation utilities that respect reduced motion */
+@media (prefers-reduced-motion: no-preference) {
+  .motion-safe\:animate-fade-in {
+    animation: fadeIn 0.4s ease-out;
+  }
+
+  .motion-safe\:animate-slide-up {
+    animation: slideUp 0.4s ease-out;
+  }
+
+  .motion-safe\:animate-scale-in {
+    animation: scaleIn 0.3s ease-out;
+  }
 }
