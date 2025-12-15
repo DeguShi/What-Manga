@@ -157,7 +157,7 @@ export function WorkDetailPanel({
 
     return (
         <Dialog open={open} onOpenChange={() => onClose()}>
-            <DialogContent className="max-w-lg glass-card border-white/20 dark:border-white/10 animate-scale-in">
+            <DialogContent className="w-[calc(100vw-2rem)] sm:max-w-lg max-h-[85vh] overflow-y-auto glass-card border-white/20 dark:border-white/10 animate-scale-in">
                 <DialogHeader className="pb-4 border-b border-white/10">
                     <div className="flex items-center justify-between">
                         <DialogTitle className="flex items-center gap-2 text-lg">

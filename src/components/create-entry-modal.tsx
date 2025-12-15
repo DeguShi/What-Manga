@@ -137,7 +137,7 @@ export function CreateEntryModal({ open, onClose, onCreated, nextIndex }: Create
 
     return (
         <Dialog open={open} onOpenChange={() => onClose()}>
-            <DialogContent className="max-w-md glass-card border-white/20 dark:border-white/10 animate-scale-in">
+            <DialogContent className="w-[calc(100vw-2rem)] sm:max-w-md max-h-[85vh] overflow-y-auto glass-card border-white/20 dark:border-white/10 animate-scale-in">
                 <DialogHeader className="pb-4 border-b border-white/10">
                     <DialogTitle className="flex items-center gap-2 text-lg">
                         <div className="flex h-8 w-8 items-center justify-center rounded-lg gradient-primary">

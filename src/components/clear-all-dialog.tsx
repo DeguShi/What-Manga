@@ -66,7 +66,7 @@ export function ClearAllDialog({ open, onClose, onCleared, totalCount }: ClearAl
 
     return (
         <Dialog open={open} onOpenChange={() => { setConfirmText(''); onClose(); }}>
-            <DialogContent className="max-w-md glass-card border-destructive/30 animate-scale-in">
+            <DialogContent className="w-[calc(100vw-2rem)] sm:max-w-md glass-card border-destructive/30 animate-scale-in">
                 <DialogHeader className="pb-4">
                     <div className="flex items-center gap-3">
                         <div className="flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
