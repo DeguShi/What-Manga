@@ -213,16 +213,58 @@ export function WorkList({
 
             {/* Mobile: Card Grid */}
             {isMobile ? (
-                <div className="grid gap-4 px-2 w-full max-w-full overflow-hidden">
-                    {filteredAndSortedWorks.map((work, index) => (
-                        <WorkCard
-                            key={work.id}
-                            work={work}
-                            index={Math.min(index, 10)} // Cap stagger delay
-                            onClick={() => setSelectedWork(work)}
-                        />
-                    ))}
-                </div>
+                <>
+                    {/* Mobile Sorting Bar */}
+                    <div className="flex items-center justify-between px-3 py-2 glass-card rounded-xl">
+                        <span className="text-xs text-muted-foreground font-medium">Sort by:</span>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => toggleSort('userIndex')}
+                                className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${sortField === 'userIndex'
+                                        ? 'bg-primary/10 text-primary'
+                                        : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'
+                                    }`}
+                            >
+                                #
+                                {sortField === 'userIndex' && (
+                                    sortOrder === 'asc' ? (
+                                        <ChevronUp className="h-3.5 w-3.5" />
+                                    ) : (
+                                        <ChevronDown className="h-3.5 w-3.5" />
+                                    )
+                                )}
+                            </button>
+                            <button
+                                onClick={() => toggleSort('score')}
+                                className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${sortField === 'score'
+                                        ? 'bg-primary/10 text-primary'
+                                        : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'
+                                    }`}
+                            >
+                                Score
+                                {sortField === 'score' && (
+                                    sortOrder === 'asc' ? (
+                                        <ChevronUp className="h-3.5 w-3.5" />
+                                    ) : (
+                                        <ChevronDown className="h-3.5 w-3.5" />
+                                    )
+                                )}
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Mobile Cards */}
+                    <div className="grid gap-4 px-2 w-full max-w-full overflow-hidden">
+                        {filteredAndSortedWorks.map((work, index) => (
+                            <WorkCard
+                                key={work.id}
+                                work={work}
+                                index={Math.min(index, 10)} // Cap stagger delay
+                                onClick={() => setSelectedWork(work)}
+                            />
+                        ))}
+                    </div>
+                </>
             ) : (
                 /* Desktop: Table */
                 <div className="glass-card rounded-2xl overflow-hidden">
