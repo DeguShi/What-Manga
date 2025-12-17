@@ -1,9 +1,25 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { auth } from '@/lib/auth';
+import { isAdmin } from '@/lib/admin-emails';
 
 export async function GET() {
     try {
+        // Auth check
+        const session = await auth();
+        if (!session?.user) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        // Admin check - only admins can export their data
+        if (!isAdmin(session.user.email) || !session.user.id) {
+            return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        }
+
+        const userId = session.user.id;
+
         const works = await prisma.work.findMany({
+            where: { userId },
             orderBy: { userIndex: 'asc' },
         });
 
