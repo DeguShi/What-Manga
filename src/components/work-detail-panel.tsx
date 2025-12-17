@@ -35,6 +35,7 @@ import {
 } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
 import { STATUS_OPTIONS, STATUS_BADGE_VARIANT, STATUS_LABELS, getScoreColor, type Status } from '@/lib/constants';
+import { DeleteEntryDialog } from '@/components/delete-entry-dialog';
 import type { Work } from '@prisma/client';
 
 interface WorkDetailPanelProps {
@@ -56,9 +57,7 @@ export function WorkDetailPanel({
     const [isEditing, setIsEditing] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [showRaw, setShowRaw] = useState(false);
-    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-    const [deleteConfirmText, setDeleteConfirmText] = useState('');
-    const [isDeleting, setIsDeleting] = useState(false);
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [formData, setFormData] = useState({
         status: work.status,
         mangaProgressCurrent: work.mangaProgressCurrent ?? 0,
@@ -77,8 +76,7 @@ export function WorkDetailPanel({
             reviewNote: work.reviewNote ?? '',
         });
         setIsEditing(false);
-        setShowDeleteConfirm(false);
-        setDeleteConfirmText('');
+        setShowDeleteDialog(false);
     }, [work]);
 
     const handleSave = async () => {
@@ -138,35 +136,9 @@ export function WorkDetailPanel({
         return 'text-muted-foreground';
     };
 
-    const handleDelete = async () => {
-        if (deleteConfirmText !== 'DELETE') return;
-
-        setIsDeleting(true);
-        try {
-            const response = await fetch(`/api/works/${work.id}`, {
-                method: 'DELETE',
-            });
-
-            if (!response.ok) throw new Error('Failed to delete');
-
-            toast({
-                title: 'Deleted',
-                description: `"${work.title}" has been removed.`,
-            });
-
-            onDelete?.(work.id);
-            onClose();
-        } catch {
-            toast({
-                title: 'Error',
-                description: 'Failed to delete entry.',
-                variant: 'destructive',
-            });
-        } finally {
-            setIsDeleting(false);
-            setShowDeleteConfirm(false);
-            setDeleteConfirmText('');
-        }
+    const handleDeleteComplete = () => {
+        onDelete?.(work.id);
+        onClose();
     };
 
     const statusOption = STATUS_OPTIONS.find((o) => o.value === work.status);
@@ -462,46 +434,16 @@ export function WorkDetailPanel({
                 <div className="flex justify-between gap-2 pt-4 border-t border-white/10">
                     {/* Delete button (left side, edit mode only) */}
                     <div>
-                        {isEditing && onDelete && !showDeleteConfirm && (
+                        {isEditing && onDelete && (
                             <Button
                                 variant="ghost"
                                 size="sm"
                                 className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                                onClick={() => setShowDeleteConfirm(true)}
+                                onClick={() => setShowDeleteDialog(true)}
                             >
                                 <Trash2 className="h-4 w-4 mr-1" />
                                 Delete
                             </Button>
-                        )}
-                        {showDeleteConfirm && (
-                            <div className="flex items-center gap-2">
-                                <input
-                                    type="text"
-                                    value={deleteConfirmText}
-                                    onChange={(e) => setDeleteConfirmText(e.target.value.toUpperCase())}
-                                    placeholder="Type DELETE"
-                                    className="w-24 px-2 py-1 text-xs font-mono border border-destructive/50 rounded bg-destructive/5 focus:outline-none focus:ring-1 focus:ring-destructive"
-                                    autoFocus
-                                />
-                                <Button
-                                    variant="destructive"
-                                    size="sm"
-                                    onClick={handleDelete}
-                                    disabled={deleteConfirmText !== 'DELETE' || isDeleting}
-                                >
-                                    {isDeleting ? '...' : 'Confirm'}
-                                </Button>
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => {
-                                        setShowDeleteConfirm(false);
-                                        setDeleteConfirmText('');
-                                    }}
-                                >
-                                    Cancel
-                                </Button>
-                            </div>
                         )}
                     </div>
 
@@ -529,6 +471,15 @@ export function WorkDetailPanel({
                     </div>
                 </div>
             </AnimatedDialogContent>
+
+            {/* Delete Confirmation Dialog */}
+            <DeleteEntryDialog
+                open={showDeleteDialog}
+                onClose={() => setShowDeleteDialog(false)}
+                onDeleted={handleDeleteComplete}
+                workId={work.id}
+                workTitle={work.title}
+            />
         </Dialog>
     );
 }
