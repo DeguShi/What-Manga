@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { isAdmin } from '@/lib/admin-emails';
+import { notifyDataChanged } from '@/lib/dataChangeNotifier';
 
 export async function DELETE(request: Request) {
     try {
@@ -44,6 +45,10 @@ export async function DELETE(request: Request) {
             totalDeleted += batchDeleted;
             console.log(`[Clear All] Admin ${session.user.email} - Deleted batch: ${batchDeleted}, total: ${totalDeleted}`);
         } while (batchDeleted > 0);
+
+        if (totalDeleted > 0) {
+            notifyDataChanged({ type: 'delete', entity: 'work', count: totalDeleted });
+        }
 
         return NextResponse.json({
             success: true,

@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { isAdmin } from '@/lib/admin-emails';
+import { notifyDataChanged } from '@/lib/dataChangeNotifier';
 import { z } from 'zod';
+
 
 // Query params schema
 const querySchema = z.object({
@@ -154,7 +156,10 @@ export async function POST(request: NextRequest) {
             },
         });
 
+        notifyDataChanged({ type: 'add', entity: 'work', id: work.id });
+
         return NextResponse.json(work, { status: 201 });
+
     } catch (error) {
         if (error instanceof z.ZodError) {
             return NextResponse.json(

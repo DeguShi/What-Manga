@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { isAdmin } from '@/lib/admin-emails';
+import { notifyDataChanged } from '@/lib/dataChangeNotifier';
 import { z } from 'zod';
 import type { Status } from '@/lib/parser';
 
@@ -103,6 +104,14 @@ export async function POST(request: NextRequest) {
                     created++;
                 }
             }
+        }
+
+        // Notify data changes for bulk operations
+        if (created > 0) {
+            notifyDataChanged({ type: 'add', entity: 'work', count: created });
+        }
+        if (updated > 0) {
+            notifyDataChanged({ type: 'update', entity: 'work', count: updated });
         }
 
         return NextResponse.json({

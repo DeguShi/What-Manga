@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { isAdmin } from '@/lib/admin-emails';
+import { notifyDataChanged } from '@/lib/dataChangeNotifier';
 import { z } from 'zod';
 
 interface RouteParams {
@@ -96,6 +97,8 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
             data,
         });
 
+        notifyDataChanged({ type: 'update', entity: 'work', id: work.id });
+
         return NextResponse.json(work);
     } catch (error) {
         if (error instanceof z.ZodError) {
@@ -139,6 +142,8 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
         await prisma.work.delete({
             where: { id },
         });
+
+        notifyDataChanged({ type: 'delete', entity: 'work', id });
 
         return NextResponse.json({ success: true });
     } catch (error) {

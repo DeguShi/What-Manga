@@ -147,6 +147,11 @@ export function WorkList({
         );
     };
 
+    const handleWorkDelete = (workId: string) => {
+        setWorks((prev) => prev.filter((w) => w.id !== workId));
+        setSelectedWork(null);
+    };
+
     const SortIcon = ({ field }: { field: SortField }) => {
         if (sortField !== field) return null;
         return sortOrder === 'asc' ? (
@@ -328,6 +333,7 @@ export function WorkList({
                     open={!!selectedWork}
                     onClose={() => setSelectedWork(null)}
                     onUpdate={handleWorkUpdate}
+                    onDelete={handleWorkDelete}
                 />
             )}
         </div>

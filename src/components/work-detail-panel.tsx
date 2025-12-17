@@ -13,6 +13,7 @@ import {
     Clock,
     Star,
     FileText,
+    Trash2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -41,6 +42,7 @@ interface WorkDetailPanelProps {
     open: boolean;
     onClose: () => void;
     onUpdate: (work: Work) => void;
+    onDelete?: (workId: string) => void;
 }
 
 export function WorkDetailPanel({
@@ -48,11 +50,15 @@ export function WorkDetailPanel({
     open,
     onClose,
     onUpdate,
+    onDelete,
 }: WorkDetailPanelProps) {
     const { toast } = useToast();
     const [isEditing, setIsEditing] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [showRaw, setShowRaw] = useState(false);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [deleteConfirmText, setDeleteConfirmText] = useState('');
+    const [isDeleting, setIsDeleting] = useState(false);
     const [formData, setFormData] = useState({
         status: work.status,
         mangaProgressCurrent: work.mangaProgressCurrent ?? 0,
@@ -71,6 +77,8 @@ export function WorkDetailPanel({
             reviewNote: work.reviewNote ?? '',
         });
         setIsEditing(false);
+        setShowDeleteConfirm(false);
+        setDeleteConfirmText('');
     }, [work]);
 
     const handleSave = async () => {
@@ -128,6 +136,37 @@ export function WorkDetailPanel({
         if (score >= 6) return 'text-amber-500';
         if (score > 0) return 'text-rose-500';
         return 'text-muted-foreground';
+    };
+
+    const handleDelete = async () => {
+        if (deleteConfirmText !== 'DELETE') return;
+
+        setIsDeleting(true);
+        try {
+            const response = await fetch(`/api/works/${work.id}`, {
+                method: 'DELETE',
+            });
+
+            if (!response.ok) throw new Error('Failed to delete');
+
+            toast({
+                title: 'Deleted',
+                description: `"${work.title}" has been removed.`,
+            });
+
+            onDelete?.(work.id);
+            onClose();
+        } catch {
+            toast({
+                title: 'Error',
+                description: 'Failed to delete entry.',
+                variant: 'destructive',
+            });
+        } finally {
+            setIsDeleting(false);
+            setShowDeleteConfirm(false);
+            setDeleteConfirmText('');
+        }
     };
 
     const statusOption = STATUS_OPTIONS.find((o) => o.value === work.status);
@@ -420,26 +459,74 @@ export function WorkDetailPanel({
                 </div>
 
                 {/* Footer */}
-                <div className="flex justify-end gap-2 pt-4 border-t border-white/10">
-                    {isEditing ? (
-                        <>
-                            <Button variant="ghost" onClick={() => setIsEditing(false)}>
-                                Cancel
-                            </Button>
+                <div className="flex justify-between gap-2 pt-4 border-t border-white/10">
+                    {/* Delete button (left side, edit mode only) */}
+                    <div>
+                        {isEditing && onDelete && !showDeleteConfirm && (
                             <Button
-                                onClick={handleSave}
-                                disabled={isLoading}
-                                className="gradient-primary text-white"
+                                variant="ghost"
+                                size="sm"
+                                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                onClick={() => setShowDeleteConfirm(true)}
                             >
-                                <Save className="mr-2 h-4 w-4" />
-                                {isLoading ? 'Saving...' : 'Save Changes'}
+                                <Trash2 className="h-4 w-4 mr-1" />
+                                Delete
                             </Button>
-                        </>
-                    ) : (
-                        <Button variant="outline" onClick={onClose}>
-                            Close
-                        </Button>
-                    )}
+                        )}
+                        {showDeleteConfirm && (
+                            <div className="flex items-center gap-2">
+                                <input
+                                    type="text"
+                                    value={deleteConfirmText}
+                                    onChange={(e) => setDeleteConfirmText(e.target.value.toUpperCase())}
+                                    placeholder="Type DELETE"
+                                    className="w-24 px-2 py-1 text-xs font-mono border border-destructive/50 rounded bg-destructive/5 focus:outline-none focus:ring-1 focus:ring-destructive"
+                                    autoFocus
+                                />
+                                <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    onClick={handleDelete}
+                                    disabled={deleteConfirmText !== 'DELETE' || isDeleting}
+                                >
+                                    {isDeleting ? '...' : 'Confirm'}
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => {
+                                        setShowDeleteConfirm(false);
+                                        setDeleteConfirmText('');
+                                    }}
+                                >
+                                    Cancel
+                                </Button>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Action buttons (right side) */}
+                    <div className="flex gap-2">
+                        {isEditing ? (
+                            <>
+                                <Button variant="ghost" onClick={() => setIsEditing(false)}>
+                                    Cancel
+                                </Button>
+                                <Button
+                                    onClick={handleSave}
+                                    disabled={isLoading}
+                                    className="gradient-primary text-white"
+                                >
+                                    <Save className="mr-2 h-4 w-4" />
+                                    {isLoading ? 'Saving...' : 'Save Changes'}
+                                </Button>
+                            </>
+                        ) : (
+                            <Button variant="outline" onClick={onClose}>
+                                Close
+                            </Button>
+                        )}
+                    </div>
                 </div>
             </AnimatedDialogContent>
         </Dialog>
