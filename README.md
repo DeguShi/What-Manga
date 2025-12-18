@@ -413,4 +413,4 @@ Index,Title,Status,Score,MangaProgress,NovelProgress,Notes
 
 ## License
 
-MIT © [DeguShi](https://github.com/DeguShi)
+GPLv2 © [DeguShi](https://github.com/DeguShi)
